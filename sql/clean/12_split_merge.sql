@@ -59,7 +59,7 @@ from (
     select t.*,
            row_number() over (
                partition by order_id
-               order by order_timestamp desc, pay_amount desc nulls last,
+               order by order_timestamp desc, pay_amount_raw desc nulls last,
                         store_id desc, channel desc
            ) as rn
     from (
@@ -71,6 +71,7 @@ from (
                order_date,
                substr(order_date, 1, 7) as order_month,
                pay_amount,
+               pay_amount_raw,
                discount_amount,
                case when pay_amount is null then null
                     else pay_amount - discount_amount end as net_amount,

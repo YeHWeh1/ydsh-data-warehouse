@@ -78,6 +78,7 @@ select o.order_id,
                  or trim(o.order_date) rlike '^[0-9]{8}$'
             then 0 else 1 end as order_date_invalid,
        o.order_time,
+       o.pay_amount as pay_amount_raw,
        case when o.pay_amount < 0 then abs(o.pay_amount)
             when o.pay_amount > f.amt_fence then null
             else o.pay_amount end as pay_amount,
