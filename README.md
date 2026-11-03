@@ -108,6 +108,14 @@ docker compose up -d
 
 或直接双击 `一键运行.bat`（第 1 周）/ `一键运行_第2周.bat`（第 2 周）。
 
+跑完想看结果：
+
+| 方式 | 打开 |
+|---|---|
+| 可视化看板（推荐，浏览器） | [reports/第2周_运行看板.html](reports/第2周_运行看板.html) |
+| 终端运行记录（真实输出） | [reports/第2周_运行记录.md](reports/第2周_运行记录.md) |
+| 看板截图 | [docs/screenshots/第2周_运行看板.png](docs/screenshots/第2周_运行看板.png) |
+
 > `模拟数据/` 需要自行放入 6 个 CSV（`ods_user.csv` 等），容器内通过 `/data` 挂载读取；数据文件按任务书要求不入版本库。
 
 ## 七、成果汇总

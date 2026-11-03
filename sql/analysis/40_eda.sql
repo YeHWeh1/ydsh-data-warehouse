@@ -24,9 +24,10 @@ from dwd_order;
 -- ------------------------------------------------------------
 select substr(order_date, 1, 7) as order_month,
        count(*) as orders,
+       sum(is_valid_amount) as valid_orders,
        cast(round(sum(if(is_valid_amount = 1, pay_amount, 0)), 2) as decimal(18, 2)) as gmv,
        cast(round(sum(if(is_valid_amount = 1, pay_amount, 0)) / sum(is_valid_amount), 2) as decimal(18, 2)) as aov,
-       count(distinct user_id) as buyers
+       count(distinct if(is_valid_amount = 1, user_id, null)) as buyers
 from dwd_order
 group by substr(order_date, 1, 7)
 order by order_month;

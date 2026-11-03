@@ -8,6 +8,12 @@
 
 $ErrorActionPreference = 'Continue'
 
+# 控制台统一按 UTF-8 处理：beeline 输出的是 UTF-8 字节，
+# 不设置时 PowerShell 会按 GBK 解码，中文会变成"寮傚父鍊?"这样的乱码
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
+try { chcp 65001 > $null } catch { }
+
 $Root = 'E:\dsh project'
 $Jdbc = 'jdbc:hive2://localhost:10000'
 $Ctr  = 'hive-server'
