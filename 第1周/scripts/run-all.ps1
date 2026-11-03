@@ -6,7 +6,13 @@
 
 $ErrorActionPreference = 'Continue'
 
-$Root = 'E:\dsh project'
+# 控制台 UTF-8，避免 beeline 输出的中文按 GBK 解码成乱码
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
+try { chcp 65001 > $null } catch { }
+
+# 本周目录（scripts 的上级），docker-compose.yml 与 sql 都在这里
+$Root = Split-Path -Parent $PSScriptRoot
 $Jdbc = 'jdbc:hive2://localhost:10000'
 $Ctr  = 'hive-server'
 

@@ -1,3 +1,7 @@
+# 项目名固定为 dshproject：目录从根目录搬到"第1周"后，
+# 若不固定，Compose 会把文件夹名当作项目名，进而使用新的数据卷（等于丢数据）
+name: dshproject
+
 services:
   mysql:
     image: mysql:8.0

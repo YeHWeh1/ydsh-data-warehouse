@@ -21,7 +21,10 @@ $ErrorActionPreference = 'Continue'
 $OutputEncoding = [System.Text.Encoding]::UTF8
 try { chcp 65001 > $null } catch { }
 
-$Root      = Split-Path -Parent $PSScriptRoot
+$Root      = Split-Path -Parent $PSScriptRoot          # 第2周 目录
+$ProjRoot  = Split-Path -Parent $Root                  # 项目根目录
+$Compose   = Join-Path $ProjRoot '第1周\docker-compose.yml'   # 环境与 ODS 由第1周提供
+$Week1Dir  = Join-Path $ProjRoot '第1周'
 $Dashboard = Join-Path $Root 'reports\第2周_运行看板.html'
 $Jdbc      = 'jdbc:hive2://localhost:10000'
 $Ctr       = 'hive-server'
@@ -210,7 +213,8 @@ function Open-Dashboard {
 
 # ============================================================
 Title '云购生活数仓 · 第2周 一键运行'
-Write-Host ('   项目目录：' + $Root) -ForegroundColor Gray
+Write-Host ('   本周目录：' + $Root) -ForegroundColor Gray
+Write-Host ('   依赖目录：' + $Week1Dir + '（环境 + ODS 数据）') -ForegroundColor Gray
 
 if ($SkipRun) {
     Step '跳过数据加工，直接打开结果看板'
@@ -247,9 +251,13 @@ if (-not $dockerOk) {
 Ok 'Docker 就绪'
 
 # ---------- 2. 启动容器 ----------
-Step '2/6 启动容器'
+Step '2/6 启动容器（环境在第1周目录）'
 Set-Location $Root
-docker compose up -d 2>&1 | Out-Null
+if (Test-Path $Compose) {
+    docker compose -f $Compose up -d 2>&1 | Out-Null
+} else {
+    Info ('未找到 ' + $Compose + '，假设容器已在运行')
+}
 docker ps --format '   {{.Names}}  {{.Status}}'
 Ok '容器已启动'
 
@@ -265,7 +273,7 @@ for ($round = 1; $round -le 2; $round++) {
     if ($ready) { break }
     if ($round -eq 1) {
         Write-Host '   仍未就绪，重建 hive-server 再等一轮 ...' -ForegroundColor Yellow
-        docker compose up -d --force-recreate hive-server 2>&1 | Out-Null
+        docker compose -f $Compose up -d --force-recreate hive-server 2>&1 | Out-Null
         Start-Sleep 10
     }
 }
@@ -275,6 +283,18 @@ if (-not $ready) {
     exit 1
 }
 Ok 'HiveServer2 就绪'
+
+# ---------- 3.5 检查第 1 周的 ODS 是否已导入 ----------
+$odsOut = docker exec $Ctr beeline -u $Jdbc --silent=true --outputformat=dsv -e 'select count(*) as c from ydsh_ods.ods_order;' 2>&1 | Out-String
+$odsMatch = [regex]::Match($odsOut, '(?m)^\s*(\d+)\s*$')
+if ($odsMatch.Success) {
+    Info ('ODS 已就绪：ods_order 共 ' + $odsMatch.Groups[1].Value + ' 行')
+} else {
+    Bad 'ODS 层未就绪（找不到 ydsh_ods.ods_order）'
+    Info ('请先运行第1周：双击 ' + (Join-Path $Week1Dir '一键运行.bat'))
+    if (-not $NoPause) { Read-Host '按回车退出' }
+    exit 1
+}
 
 # ---------- 4. 按顺序执行四层加工 ----------
 Step '4/6 执行第2周脚本（10 个，按依赖顺序）'
