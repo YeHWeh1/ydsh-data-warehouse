@@ -33,9 +33,19 @@ $b.IconLocation     = 'C:\Windows\System32\shell32.dll,23'
 $b.Description      = '直接打开第2周结果看板（不重跑数据）'
 $b.Save()
 
+# 3) 终端结果：不重跑，在控制台重新打印已对齐的结果表（窗口停留）
+$c = $ws.CreateShortcut((Join-Path $Desktop '第2周 终端结果.lnk'))
+$c.TargetPath       = $PS
+$c.Arguments        = '-NoProfile -ExecutionPolicy Bypass -File "' + $Script + '" -ShowOnly'
+$c.WorkingDirectory = $Root
+$c.IconLocation     = 'C:\Windows\System32\shell32.dll,16'
+$c.Description      = '在终端重新打印第2周结果表（不重跑数据）'
+$c.Save()
+
 Write-Host ''
 Write-Host '已在桌面创建：' -ForegroundColor Green
 Write-Host ('  第2周 一键运行.lnk   -> ' + $Script)
 Write-Host ('  第2周 查看结果.lnk   -> ' + $Dashboard)
+Write-Host '  第2周 终端结果.lnk   -> 同脚本 -ShowOnly'
 Write-Host ''
 Write-Host '若快捷方式打不开，请检查上面的路径是否存在。' -ForegroundColor Gray

@@ -1,12 +1,16 @@
 ﻿<#
   第 2 周 一键运行（桌面双击即可）
-  作用：启动 Docker → 等 Hive 就绪 → 按依赖顺序跑完 10 个脚本 → 自动打开结果看板
+  作用：启动 Docker → 等 Hive 就绪 → 按依赖顺序跑完 10 个脚本 → 打印结果 → 打开看板
   参数：
-    -SkipRun   不重跑数据，只打开已有的结果看板（秒开）
+    -SkipRun   只打开结果看板（秒开，不重跑）
+    -ShowOnly  只重新打印终端结果表（不重跑、不开看板）
     -NoPause   结束后不等待回车
+  说明：结果表格由脚本自己渲染（按显示宽度对齐，中文占 2 列），
+        不直接使用 beeline 的表格输出，避免中文导致边框错位
 #>
 param(
     [switch]$SkipRun,
+    [switch]$ShowOnly,
     [switch]$NoPause
 )
 
@@ -17,33 +21,181 @@ $ErrorActionPreference = 'Continue'
 $OutputEncoding = [System.Text.Encoding]::UTF8
 try { chcp 65001 > $null } catch { }
 
-$Root      = Split-Path -Parent $PSScriptRoot      # 项目根目录（由脚本位置推出来，不写死）
+$Root      = Split-Path -Parent $PSScriptRoot
 $Dashboard = Join-Path $Root 'reports\第2周_运行看板.html'
 $Jdbc      = 'jdbc:hive2://localhost:10000'
 $Ctr       = 'hive-server'
 $script:fail = 0
 
+# ---------------- 基础输出 ----------------
 function Title($t) {
     Write-Host ""
-    Write-Host ('=' * 66) -ForegroundColor DarkCyan
+    Write-Host ('=' * 70) -ForegroundColor DarkCyan
     Write-Host ('  ' + $t) -ForegroundColor White
-    Write-Host ('=' * 66) -ForegroundColor DarkCyan
+    Write-Host ('=' * 70) -ForegroundColor DarkCyan
 }
 function Step($t) { Write-Host ""; Write-Host ('>> ' + $t) -ForegroundColor Cyan }
 function Ok($t)   { Write-Host ('   OK   ' + $t) -ForegroundColor Green }
 function Bad($t)  { Write-Host ('   失败  ' + $t) -ForegroundColor Red; $script:fail++ }
 function Info($t) { Write-Host ('   ' + $t) -ForegroundColor Gray }
 
-# 只打印结果表格，过滤 beeline 日志噪音
-function RunSql([string]$sql) {
-    $out = docker exec $Ctr beeline -u $Jdbc -e $sql 2>&1 | Out-String
-    $lines = $out -split "`r?`n"
-    $lines | Where-Object { $_ -match '^\s*\|' -or $_ -match '^\s*\+--' } |
-        ForEach-Object { Write-Host $_ }
-    $err = $lines | Where-Object { $_ -match 'Error: |FAILED: ' } | Select-Object -First 2
-    if ($err) { $err | ForEach-Object { Bad $_ } }
+# ---------------- 宽度感知的表格渲染 ----------------
+# 中文字符在等宽字体里占 2 列，beeline 按字符数补齐会错位，这里按显示宽度算
+function Get-Width([string]$s) {
+    $w = 0
+    foreach ($c in $s.ToCharArray()) {
+        $cp = [int]$c
+        if (($cp -ge 0x1100 -and $cp -le 0x115F) -or
+            ($cp -ge 0x2E80 -and $cp -le 0xA4CF) -or
+            ($cp -ge 0xAC00 -and $cp -le 0xD7A3) -or
+            ($cp -ge 0xF900 -and $cp -le 0xFAFF) -or
+            ($cp -ge 0xFE30 -and $cp -le 0xFE6F) -or
+            ($cp -ge 0xFF00 -and $cp -le 0xFF60) -or
+            ($cp -ge 0xFFE0 -and $cp -le 0xFFE6)) { $w += 2 } else { $w += 1 }
+    }
+    return $w
 }
 
+function Trim-Width([string]$s, [int]$max) {
+    if ((Get-Width $s) -le $max) { return $s }
+    $w = 0; $out = ''
+    foreach ($c in $s.ToCharArray()) {
+        $cw = if ((Get-Width ([string]$c)) -eq 2) { 2 } else { 1 }
+        if ($w + $cw -gt ($max - 2)) { break }
+        $out += $c; $w += $cw
+    }
+    return ($out + '..')
+}
+
+function Write-Row([string[]]$cells, [int[]]$widths, [switch]$Header) {
+    $line = '|'
+    for ($c = 0; $c -lt $cells.Count; $c++) {
+        $v = [string]$cells[$c]
+        $pad = $widths[$c] - (Get-Width $v)
+        $isNum = (-not $Header) -and ($v -match '^-?\d+(\.\d+)?$')
+        if ($isNum) { $line += ' ' + (' ' * $pad) + $v + ' |' }
+        else        { $line += ' ' + $v + (' ' * $pad) + ' |' }
+    }
+    Write-Host $line
+}
+
+function Render-Table([string[]]$rawLines, [int]$maxCol = 60) {
+    $rows = @()
+    foreach ($l in $rawLines) {
+        if ($null -eq $l) { continue }
+        $cells = @($l -split '\|')
+        # 跳过空行 / 全为 NULL 的行（describe formatted 里的占位行）
+        $meaningful = @($cells | Where-Object { $_.Trim() -ne '' -and $_.Trim() -ne 'NULL' })
+        if ($meaningful.Count -eq 0) { continue }
+        $rows += , $cells
+    }
+    if ($rows.Count -eq 0) { Info '(无数据)'; return }
+
+    $cols = 0
+    foreach ($r in $rows) { if ($r.Count -gt $cols) { $cols = $r.Count } }
+
+    $norm = @()
+    foreach ($r in $rows) {
+        $cells = @($r)
+        while ($cells.Count -lt $cols) { $cells += '' }
+        $t = @()
+        foreach ($c in $cells) { $t += (Trim-Width $c $maxCol) }
+        $norm += , $t
+    }
+
+    $widths = @()
+    for ($c = 0; $c -lt $cols; $c++) {
+        $mx = 0
+        foreach ($r in $norm) { $x = Get-Width $r[$c]; if ($x -gt $mx) { $mx = $x } }
+        $widths += $mx
+    }
+
+    $sep = '+' + (($widths | ForEach-Object { '-' * ($_ + 2) }) -join '+') + '+'
+    Write-Host $sep
+    for ($i = 0; $i -lt $norm.Count; $i++) {
+        Write-Row $norm[$i] $widths -Header:($i -eq 0)
+        if ($i -eq 0) { Write-Host $sep }
+    }
+    Write-Host $sep
+}
+
+# ---------------- 查询封装 ----------------
+function Invoke-Beeline([string]$sql) {
+    $out = docker exec $Ctr beeline -u $Jdbc --silent=true --outputformat=dsv -e $sql 2>&1 | Out-String
+    return ($out -split "`r?`n")
+}
+
+function RunSql([string]$sql, [int]$maxCol = 60) {
+    $lines = Invoke-Beeline $sql
+    $err = $lines | Where-Object { $_ -match '^Error: |^FAILED: ' } | Select-Object -First 2
+    if ($err) { $err | ForEach-Object { Bad ($_.Trim()) }; return }
+    $data = @($lines | Where-Object {
+        $t = $_.Trim()
+        $t -ne '' -and
+        $t -notmatch 'SLF4J|log4j|Binder\.class|jar:file:' -and
+        $t -notmatch '^\[WARN\]' -and
+        $t -notmatch '^No such file' -and
+        $t -notmatch '^docker :' -and
+        $t -notmatch '^(所在位置|\+ |    \+ |CategoryInfo|FullyQualifiedErrorId|RemoteException)'
+    })
+    Render-Table $data $maxCol
+}
+
+# 从 describe formatted 里提取关键行，拼成 "Key: Value" / "Key: [value]"
+function Show-TableDetail([string]$table, [string[]]$keys) {
+    $lines = Invoke-Beeline ("describe formatted " + $table + ";")
+    foreach ($l in $lines) {
+        if ($l -notmatch '\|') { continue }
+        $cells = @(($l -split '\|') | ForEach-Object { $_.Trim() } | Where-Object {
+            $_ -ne '' -and $_ -ne 'NULL'
+        })
+        if ($cells.Count -lt 2) { continue }
+        $k = $cells[0]
+        $v = ($cells[1..($cells.Count - 1)] -join ' ')
+        $joined = if ($k.EndsWith(':')) { $k + ' ' + $v } else { $k + ': ' + $v }
+        foreach ($want in $keys) {
+            if ($joined -match ('^' + [regex]::Escape($want))) {
+                Write-Host ('   ' + $joined)
+            }
+        }
+    }
+}
+
+# ---------------- 结果展示 ----------------
+function Show-Results {
+    Step '结果展示'
+
+    Write-Host ''
+    Write-Host '  [A] 事实表行数（应为 15000 / 37549 / 60000）' -ForegroundColor Yellow
+    RunSql "select 'dwd_order' as tbl, count(*) as cnt from ydsh_dwd.dwd_order
+union all select 'dwd_order_item', count(*) from ydsh_dwd.dwd_order_item
+union all select 'dwd_user_behavior', count(*) from ydsh_dwd.dwd_user_behavior"
+
+    Write-Host ''
+    Write-Host '  [B] 订单事实表结构（中文注释）' -ForegroundColor Yellow
+    RunSql 'describe ydsh_dwd.dwd_order;' 52
+
+    Write-Host ''
+    Write-Host '  [C] 分区与分桶' -ForegroundColor Yellow
+    RunSql 'select count(*) as partitions from (select order_date from ydsh_dwd.dwd_order group by order_date) t;'
+    Show-TableDetail 'ydsh_dwd.dwd_user_behavior' @('Num Buckets', 'Bucket Columns', 'numFiles', 'numRows')
+
+    Write-Host ''
+    Write-Host '  [D] 数据质量修复率（五类脏数据，22 项）' -ForegroundColor Yellow
+    RunSql "select metric_class, metric_name, before_cnt, after_cnt,
+       case when before_cnt = 0 then null
+            else round((before_cnt - after_cnt) * 100.0 / before_cnt, 1) end as fix_rate_pct
+from ydsh_dwd.qc_metric order by metric_class, metric_name"
+
+    Write-Host ''
+    Write-Host '  [E] 核心指标' -ForegroundColor Yellow
+    RunSql "select kpi_name, cast(kpi_value as decimal(18,2)) as kpi_value, unit
+from ydsh_ads.ads_kpi_overview order by kpi_name"
+    RunSql 'select rank_no, category, gmv, gmv_share_pct from ydsh_ads.ads_category_rank order by rank_no'
+    RunSql 'select rank_no, province, gmv, share_pct from ydsh_ads.ads_region_rank order by rank_no limit 5'
+}
+
+# ---------------- 打开看板 ----------------
 function Open-Dashboard {
     if (Test-Path $Dashboard) {
         Write-Host ''
@@ -60,10 +212,15 @@ function Open-Dashboard {
 Title '云购生活数仓 · 第2周 一键运行'
 Write-Host ('   项目目录：' + $Root) -ForegroundColor Gray
 
-# ---------- 只看看板 ----------
 if ($SkipRun) {
     Step '跳过数据加工，直接打开结果看板'
     Open-Dashboard
+    if (-not $NoPause) { Write-Host ''; Read-Host '按回车退出' }
+    exit
+}
+
+if ($ShowOnly) {
+    Show-Results
     if (-not $NoPause) { Write-Host ''; Read-Host '按回车退出' }
     exit
 }
@@ -146,7 +303,7 @@ foreach ($s in $scripts) {
         ($out -split "`r?`n" | Where-Object { $_ -match 'Error: |FAILED: ' } | Select-Object -First 2) |
             ForEach-Object { Write-Host ('      ' + $_) }
     } else {
-        Ok (('{0}  {1}' -f $s.n, $s.desc).PadRight(46) + ('({0,3:N0}s)' -f $sw.Elapsed.TotalSeconds))
+        Ok (('{0}  {1}' -f $s.n, $s.desc).PadRight(44) + ('({0,3:N0}s)' -f $sw.Elapsed.TotalSeconds))
     }
 }
 $total.Stop()
@@ -154,37 +311,7 @@ Write-Host ''
 Info ('10 个脚本总耗时：{0:N0} 秒' -f $total.Elapsed.TotalSeconds)
 
 # ---------- 5. 结果展示 ----------
-Step '5/6 结果展示'
-
-Write-Host ''
-Write-Host '  [A] 事实表行数（应为 15000 / 37549 / 60000）' -ForegroundColor Yellow
-RunSql "select 'dwd_order' as tbl, count(*) as cnt from ydsh_dwd.dwd_order
-union all select 'dwd_order_item', count(*) from ydsh_dwd.dwd_order_item
-union all select 'dwd_user_behavior', count(*) from ydsh_dwd.dwd_user_behavior"
-
-Write-Host ''
-Write-Host '  [B] 分区数（应为 366）、分桶数（应为 8）、表结构' -ForegroundColor Yellow
-RunSql 'select count(*) as partitions from (select order_date from ydsh_dwd.dwd_order group by order_date) t;'
-RunSql 'describe ydsh_dwd.dwd_order;'
-RunSql 'describe ydsh_dwd.dwd_user_behavior;'
-$storage = docker exec $Ctr beeline -u $Jdbc -e 'describe formatted ydsh_dwd.dwd_user_behavior;' 2>&1 | Out-String
-($storage -split "`r?`n") |
-    Where-Object { $_ -match 'Num Buckets|Bucket Columns|numFiles|numRows|Location' } |
-    ForEach-Object { Write-Host ('   ' + $_.Trim()) }
-
-Write-Host ''
-Write-Host '  [C] 数据质量修复率（五类脏数据，22 项）' -ForegroundColor Yellow
-RunSql "select metric_class, metric_name, before_cnt, after_cnt,
-       case when before_cnt = 0 then null
-            else round((before_cnt - after_cnt) * 100.0 / before_cnt, 1) end as fix_rate_pct
-from ydsh_dwd.qc_metric order by metric_class, metric_name"
-
-Write-Host ''
-Write-Host '  [D] 核心指标' -ForegroundColor Yellow
-RunSql "select kpi_name, cast(kpi_value as decimal(18,2)) as kpi_value, unit
-from ydsh_ads.ads_kpi_overview order by kpi_name"
-RunSql 'select rank_no, category, gmv, gmv_share_pct from ydsh_ads.ads_category_rank order by rank_no'
-RunSql 'select rank_no, province, gmv, share_pct from ydsh_ads.ads_region_rank order by rank_no limit 5'
+Show-Results
 
 # ---------- 6. 完成 ----------
 Title '全部完成'
