@@ -8,6 +8,7 @@ services:
     container_name: meta-mysql
     restart: unless-stopped
     environment:
+      # 本地课程演示用的默认口令（仅容器内网访问，非生产凭据）；如需公开部署请改用 .env 注入
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: metastore
     ports:
