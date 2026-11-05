@@ -110,14 +110,35 @@ from ydsh_dws.dws_user_consume
 group by value_segment;
 
 -- ------------------------------------------------------------
--- 6. 校验
+-- 6. 门店销售排行（任务书子任务 7：门店分布分析）
+-- ------------------------------------------------------------
+drop table if exists ads_store_rank;
+create table ads_store_rank stored as orc as
+select row_number() over (order by gmv desc) as rank_no,
+       store_id,
+       store_name,
+       province,
+       city,
+       area,
+       order_cnt,
+       buyer_cnt,
+       gmv,
+       aov,
+       gmv_per_sqm,
+       round(gmv * 100.0 / sum(gmv) over (), 2) as share_pct
+from ydsh_dws.dws_store_sales;
+
+-- ------------------------------------------------------------
+-- 7. 校验（拆成两条，避免单个 DAG 顶点过多）
 -- ------------------------------------------------------------
 select 'ads_kpi_overview' as tbl, count(*) as cnt from ads_kpi_overview
 union all
 select 'ads_category_rank', count(*) from ads_category_rank
 union all
-select 'ads_region_rank', count(*) from ads_region_rank
+select 'ads_region_rank', count(*) from ads_region_rank;
+
+select 'ads_channel_share' as tbl, count(*) as cnt from ads_channel_share
 union all
-select 'ads_channel_share', count(*) from ads_channel_share
+select 'ads_user_segment', count(*) from ads_user_segment
 union all
-select 'ads_user_segment', count(*) from ads_user_segment;
+select 'ads_store_rank', count(*) from ads_store_rank;

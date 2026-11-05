@@ -137,14 +137,41 @@ from (
 ) t;
 
 -- ------------------------------------------------------------
--- 6. 校验
+-- 6. 门店销售汇总：门店粒度（含坪效 = GMV / 营业面积）
+--    任务书子任务 7 要求"品类 / 省份 / 门店 / 渠道"四个维度的分布分析，
+--    门店维度单独建汇总表，供 ADS 排行与探索性分析使用
+-- ------------------------------------------------------------
+drop table if exists dws_store_sales;
+create table dws_store_sales stored as orc as
+select o.store_id,
+       s.store_name,
+       s.province,
+       s.city,
+       s.district,
+       s.area,
+       s.open_date,
+       count(*) as order_cnt,
+       count(distinct o.user_id) as buyer_cnt,
+       round(sum(o.pay_amount), 2) as gmv,
+       round(avg(o.pay_amount), 2) as aov,
+       case when s.area is null or s.area = 0 then null
+            else round(sum(o.pay_amount) / s.area, 2) end as gmv_per_sqm
+from ydsh_dwd.dwd_order o
+join ydsh_dwd.dim_store s on o.store_id = s.store_id
+where o.is_valid_amount = 1
+group by o.store_id, s.store_name, s.province, s.city, s.district, s.area, s.open_date;
+
+-- ------------------------------------------------------------
+-- 7. 校验（拆成两条，避免单个 DAG 顶点过多触发 Tez 计数器上限）
 -- ------------------------------------------------------------
 select 'dws_sales_daily' as tbl, count(*) as cnt from dws_sales_daily
 union all
 select 'dws_category_sales', count(*) from dws_category_sales
 union all
-select 'dws_region_sales', count(*) from dws_region_sales
+select 'dws_region_sales', count(*) from dws_region_sales;
+
+select 'dws_channel_pay' as tbl, count(*) as cnt from dws_channel_pay
 union all
-select 'dws_channel_pay', count(*) from dws_channel_pay
+select 'dws_user_consume', count(*) from dws_user_consume
 union all
-select 'dws_user_consume', count(*) from dws_user_consume;
+select 'dws_store_sales', count(*) from dws_store_sales;

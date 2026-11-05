@@ -336,7 +336,7 @@ Show-Results
 # ---------- 6. 完成 ----------
 Title '全部完成'
 Write-Host '  四层：ydsh_ods → ydsh_dwd → ydsh_dws → ydsh_ads' -ForegroundColor Green
-Write-Host '  维度 7 张 / 事实 3 张 / 汇总 5 张 / 指标 5 张' -ForegroundColor Green
+Write-Host '  维度 7 张 / 事实 3 张 / 汇总 6 张 / 指标 6 张' -ForegroundColor Green
 if ($script:fail -eq 0) {
     Write-Host '  执行结果：全部成功' -ForegroundColor Green
 } else {

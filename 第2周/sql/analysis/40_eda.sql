@@ -179,3 +179,31 @@ select value_segment, user_cnt,
        cast(avg_gmv as decimal(18, 2)) as avg_gmv
 from ydsh_ads.ads_user_segment
 order by gmv desc;
+
+-- ------------------------------------------------------------
+-- 12. 门店分布（任务书子任务 7 要求：品类 / 省份 / 门店 / 渠道）
+-- ------------------------------------------------------------
+-- 12.1 门店销售 TOP10
+select rank_no, store_name, province, city, area, order_cnt,
+       cast(gmv as decimal(18, 2)) as gmv,
+       cast(aov as decimal(18, 2)) as aov,
+       cast(gmv_per_sqm as decimal(18, 2)) as gmv_per_sqm
+from ydsh_ads.ads_store_rank
+order by rank_no
+limit 10;
+
+-- 12.2 门店数量与销售按省份分布（60 家门店）
+select province, count(*) as store_cnt,
+       cast(round(sum(gmv), 2) as decimal(18, 2)) as gmv,
+       cast(round(avg(gmv_per_sqm), 2) as decimal(18, 2)) as avg_gmv_per_sqm
+from ydsh_dws.dws_store_sales
+group by province
+order by gmv desc;
+
+-- 12.3 坪效 TOP5（单位面积产出最高）
+select store_name, province, city, area,
+       cast(gmv as decimal(18, 2)) as gmv,
+       cast(gmv_per_sqm as decimal(18, 2)) as gmv_per_sqm
+from ydsh_dws.dws_store_sales
+order by gmv_per_sqm desc
+limit 5;

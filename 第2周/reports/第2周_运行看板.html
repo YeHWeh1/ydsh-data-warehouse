@@ -36,7 +36,7 @@ code{background:#eef1f4;padding:1px 6px;border-radius:5px;font-family:Consolas,m
 <div class="banner">
   <b>云仓五号 · 第 2 周运行看板</b><br>
   <span>Hive 4.0.0 + Tez</span><span>ODS → DWD → DWS → ADS</span>
-  <span>物理表 25 张</span><span>跑通时间 ≤ 4 分钟</span>
+  <span>物理表 27 张</span><span>跑通时间 ≤ 4 分钟</span>
 </div>
 <div class="cards"><div class="card"><div class="k-name">下单用户数</div><div class="k-val">1,000</div><div class="k-unit">人</div></div><div class="card"><div class="k-name">复购用户数</div><div class="k-val">1,000</div><div class="k-unit">人</div></div><div class="card"><div class="k-name">客单价 AOV</div><div class="k-val">2,519.59</div><div class="k-unit">元</div></div><div class="card"><div class="k-name">总 GMV</div><div class="k-val">3,702.79</div><div class="k-unit">万元</div></div><div class="card"><div class="k-name">总订单量</div><div class="k-val">15,000</div><div class="k-unit">单</div></div><div class="card"><div class="k-name">有效订单量</div><div class="k-val">14,696</div><div class="k-unit">单</div></div><div class="card"><div class="k-name">注册用户数</div><div class="k-val">1,000</div><div class="k-unit">人</div></div></div>
 
@@ -68,7 +68,12 @@ code{background:#eef1f4;padding:1px 6px;border-radius:5px;font-family:Consolas,m
   <tbody><tr><td class="mono">pv</td><td>浏览</td><td class="num">34,160</td><td class="num">1,000</td></tr><tr><td class="mono">buy</td><td>购买</td><td class="num">11,969</td><td class="num">1,000</td></tr><tr><td class="mono">cart</td><td>加购</td><td class="num">8,286</td><td class="num">1,000</td></tr><tr><td class="mono">fav</td><td>收藏</td><td class="num">5,585</td><td class="num">995</td></tr></tbody></table></div></div>
 </div>
 
-<h2>七、图表</h2>
+<h2>七、门店销售 TOP10（含坪效）</h2>
+<div class="panel"><table>
+<thead><tr><th class="num">排名</th><th>门店</th><th>省份 / 城市</th><th class="num">面积(㎡)</th><th class="num">订单</th><th class="num">GMV（元）</th><th class="num">坪效（元/㎡）</th></tr></thead>
+<tbody><tr><td class="num">1</td><td>云购生活·绍兴旗舰店</td><td>浙江省 / 绍兴</td><td class="num">488</td><td class="num">263</td><td class="num">722,457.44</td><td class="num strong">1,480.45</td></tr><tr><td class="num">2</td><td>云购生活·北京二店</td><td>北京市 / 北京</td><td class="num">128</td><td class="num">289</td><td class="num">713,114.38</td><td class="num strong">5,571.21</td></tr><tr><td class="num">3</td><td>云购生活·合肥购物中心店</td><td>安徽省 / 合肥</td><td class="num">575</td><td class="num">267</td><td class="num">707,147.03</td><td class="num strong">1,229.82</td></tr><tr><td class="num">4</td><td>云购生活·莆田旗舰店</td><td>福建省 / 莆田</td><td class="num">147</td><td class="num">269</td><td class="num">704,669.09</td><td class="num strong">4,793.67</td></tr><tr><td class="num">5</td><td>云购生活·开封社区店</td><td>河南省 / 开封</td><td class="num">618</td><td class="num">268</td><td class="num">695,991.28</td><td class="num strong">1,126.20</td></tr><tr><td class="num">6</td><td>云购生活·株洲一店</td><td>湖南省 / 株洲</td><td class="num">269</td><td class="num">265</td><td class="num">693,051.23</td><td class="num strong">2,576.40</td></tr><tr><td class="num">7</td><td>云购生活·嘉兴社区店</td><td>浙江省 / 嘉兴</td><td class="num">686</td><td class="num">255</td><td class="num">687,586.96</td><td class="num strong">1,002.31</td></tr><tr><td class="num">8</td><td>云购生活·大连二店</td><td>辽宁省 / 大连</td><td class="num">522</td><td class="num">262</td><td class="num">686,426.41</td><td class="num strong">1,314.99</td></tr><tr><td class="num">9</td><td>云购生活·德阳购物中心店</td><td>四川省 / 德阳</td><td class="num">550</td><td class="num">271</td><td class="num">676,303.79</td><td class="num strong">1,229.64</td></tr><tr><td class="num">10</td><td>云购生活·泸州社区店</td><td>四川省 / 泸州</td><td class="num">184</td><td class="num">262</td><td class="num">673,700.55</td><td class="num strong">3,661.42</td></tr></tbody></table></div>
+
+<h2>八、图表</h2>
 <div class="two">
   <img src="../docs/screenshots/第2周_四层数仓架构.png" alt="四层架构">
   <img src="../docs/screenshots/第2周_探索性分析.png" alt="探索性分析">

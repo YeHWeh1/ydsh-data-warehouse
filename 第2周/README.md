@@ -30,8 +30,8 @@
 │   │   ├── 00_ddl.sql                # 7 维度 + 3 事实建表
 │   │   ├── 01_load_dim.sql
 │   │   └── 02_load_fact.sql
-│   ├── dws\20_dws.sql                # 5 张主题汇总
-│   ├── ads\30_ads.sql                # 5 张指标表
+│   ├── dws\20_dws.sql                # 6 张主题汇总（含门店）
+│   ├── ads\30_ads.sql                # 6 张指标表（含门店排行）
 │   └── analysis\40_eda.sql           # 探索性分析
 ├── reports\
 │   ├── 第2周_数据质量对比报告.md
@@ -41,7 +41,7 @@
 ├── docs\
 │   ├── 第2周_数仓架构设计.md
 │   ├── 第2周_答辩手册.md
-│   ├── 云仓五号_第2周_AI协同日志.md
+│   ├── 第2周_AI协同日志.md
 │   └── screenshots\                 # 架构图、分析图、看板截图
 ├── scripts\
 │   ├── run-week2.ps1                # 一键：10 个脚本按依赖顺序执行
@@ -86,8 +86,8 @@ powershell -File scripts/run-week2.ps1 -SkipRun
 |---|---|---|---|
 | ODS 贴源层 | `ydsh_ods` | 6 张原始表，114,809 行 | 6（第 1 周建） |
 | DWD 明细层 | `ydsh_dwd` | 7 维度 + 3 事实，ORC；订单按日分区 366 个，行为按 `user_id` 分 8 桶 | 10 |
-| DWS 汇总层 | `ydsh_dws` | 日 / 品类 / 区域 / 渠道支付 / 用户累计 | 5 |
-| ADS 应用层 | `ydsh_ads` | KPI、品类排行、区域排行、渠道占比、用户分层 | 5 |
+| DWS 汇总层 | `ydsh_dws` | 日 / 品类 / 区域 / 渠道支付 / 用户累计 / 门店 | 6 |
+| ADS 应用层 | `ydsh_ads` | KPI、品类排行、区域排行、渠道占比、用户分层、门店排行 | 6 |
 
 ## 五、本周成果
 
@@ -98,6 +98,20 @@ powershell -File scripts/run-week2.ps1 -SkipRun
 | 品类第一 | 运动户外 14.88% |
 | 维度建模 | 星型模型，事实表 366 分区、行为表 8 桶 |
 | 代码规模 | 10 个 SQL 脚本 + 3 个 PowerShell 脚本，一键可重跑 |
+
+## 五之二、提交物（对照《第 2 周作业任务与提交清单》）
+
+| 清单要求 | 本目录文件 | 格式 |
+|---|---|---|
+| 数据质量对比报告 | `reports/数据质量对比报告.docx`（源：`第2周_数据质量对比报告.md`） | Word |
+| 数仓架构设计文档 | `docs/数仓架构设计文档.docx`（源：`第2周_数仓架构设计.md`） | Word |
+| 探索性分析简报 | `reports/探索性分析简报.docx`（源：`第2周_探索性分析简报.md`） | Word |
+| AI 协同日志 | `docs/第2周_AI协同日志.md`（按模板五部分，12 条记录） | Markdown |
+| 清洗 / 建模脚本 | `sql/clean/`、`sql/dwd/` | 代码（Git） |
+| 打包提交 | `第2周_提交.zip` | 压缩包 |
+
+> `.docx` 由 `scripts/md2docx.py` 从同名 Markdown 生成（保持单一数据源）：
+> `python scripts/md2docx.py <input.md> <output.docx>`。
 
 ## 六、交付物清单（对照任务书）
 
