@@ -1,0 +1,1222 @@
+[
+  {
+    "db": "ydsh_dwd",
+    "table": "dwd_order",
+    "full_name": "ydsh_dwd.dwd_order",
+    "desc": "订单事实表（一行一单）",
+    "columns": [
+      {
+        "name": "order_id",
+        "type": "string",
+        "comment": "订单编号（主键）"
+      },
+      {
+        "name": "user_id",
+        "type": "string",
+        "comment": "用户编号（外键 → dim_user）"
+      },
+      {
+        "name": "store_id",
+        "type": "string",
+        "comment": "门店编号（外键 → dim_store）"
+      },
+      {
+        "name": "order_timestamp",
+        "type": "string",
+        "comment": "下单完整时间 yyyy-MM-dd HH:mm:ss（日期+时间合并）"
+      },
+      {
+        "name": "order_hour",
+        "type": "int",
+        "comment": "下单小时（时间字段拆分）"
+      },
+      {
+        "name": "pay_amount",
+        "type": "double",
+        "comment": "实付金额（负值已取绝对值，超大值已置空）"
+      },
+      {
+        "name": "discount_amount",
+        "type": "double",
+        "comment": "优惠金额"
+      },
+      {
+        "name": "net_amount",
+        "type": "double",
+        "comment": "净额 = 实付 - 优惠"
+      },
+      {
+        "name": "pay_type_code",
+        "type": "string",
+        "comment": "支付方式编码（关联 dim_pay_type）"
+      },
+      {
+        "name": "pay_type",
+        "type": "string",
+        "comment": "支付方式中文名"
+      },
+      {
+        "name": "order_status_code",
+        "type": "string",
+        "comment": "订单状态编码"
+      },
+      {
+        "name": "order_status",
+        "type": "string",
+        "comment": "订单状态中文名"
+      },
+      {
+        "name": "channel_code",
+        "type": "string",
+        "comment": "渠道编码"
+      },
+      {
+        "name": "channel",
+        "type": "string",
+        "comment": "下单渠道"
+      },
+      {
+        "name": "amount_flag",
+        "type": "int",
+        "comment": "0=正常 1=负金额已修正 2=超大金额已置空"
+      },
+      {
+        "name": "discount_flag",
+        "type": "int",
+        "comment": "1=负优惠金额已修正"
+      },
+      {
+        "name": "is_valid_amount",
+        "type": "int",
+        "comment": "1=金额可参与统计"
+      },
+      {
+        "name": "order_date",
+        "type": "string",
+        "comment": "下单日期分区键"
+      }
+    ],
+    "n_cols": 18,
+    "rows": 15000
+  },
+  {
+    "db": "ydsh_dwd",
+    "table": "dwd_order_item",
+    "full_name": "ydsh_dwd.dwd_order_item",
+    "desc": "订单明细事实表（一行一商品）",
+    "columns": [
+      {
+        "name": "item_id",
+        "type": "string",
+        "comment": "明细编号（主键）"
+      },
+      {
+        "name": "order_id",
+        "type": "string",
+        "comment": "订单编号（外键 → dwd_order）"
+      },
+      {
+        "name": "product_id",
+        "type": "string",
+        "comment": "商品编号（外键 → dim_product）"
+      },
+      {
+        "name": "quantity",
+        "type": "int",
+        "comment": "购买数量（0 与超大值已置空）"
+      },
+      {
+        "name": "unit_price",
+        "type": "double",
+        "comment": "商品单价（负值已修正）"
+      },
+      {
+        "name": "discount",
+        "type": "double",
+        "comment": "折扣率"
+      },
+      {
+        "name": "item_amount",
+        "type": "double",
+        "comment": "明细金额 = 数量 × 单价 × (1-折扣)"
+      },
+      {
+        "name": "qty_flag",
+        "type": "int",
+        "comment": "0=正常 1=负数量修正 2=零数量置空 3=超大数量置空"
+      },
+      {
+        "name": "order_date",
+        "type": "string",
+        "comment": "下单日期分区键"
+      }
+    ],
+    "n_cols": 9,
+    "rows": 37549
+  },
+  {
+    "db": "ydsh_dwd",
+    "table": "dim_user",
+    "full_name": "ydsh_dwd.dim_user",
+    "desc": "用户维度表",
+    "columns": [
+      {
+        "name": "user_id",
+        "type": "string",
+        "comment": "用户编号（主键）"
+      },
+      {
+        "name": "user_name",
+        "type": "string",
+        "comment": "姓名"
+      },
+      {
+        "name": "gender",
+        "type": "string",
+        "comment": "性别（规范值：男/女/未知）"
+      },
+      {
+        "name": "gender_code",
+        "type": "string",
+        "comment": "性别编码 M/F/U"
+      },
+      {
+        "name": "age",
+        "type": "int",
+        "comment": "年龄（1~120）"
+      },
+      {
+        "name": "age_band",
+        "type": "string",
+        "comment": "年龄段"
+      },
+      {
+        "name": "city",
+        "type": "string",
+        "comment": "城市"
+      },
+      {
+        "name": "province",
+        "type": "string",
+        "comment": "省份"
+      },
+      {
+        "name": "region",
+        "type": "string",
+        "comment": "省份-城市（字段合并）"
+      },
+      {
+        "name": "register_date",
+        "type": "string",
+        "comment": "注册日期 yyyy-MM-dd"
+      },
+      {
+        "name": "register_month",
+        "type": "string",
+        "comment": "注册年月 yyyy-MM"
+      },
+      {
+        "name": "member_level_code",
+        "type": "string",
+        "comment": "会员等级编码"
+      },
+      {
+        "name": "member_level",
+        "type": "string",
+        "comment": "会员等级（规范中文）"
+      },
+      {
+        "name": "phone",
+        "type": "string",
+        "comment": "手机号（11 位纯数字）"
+      },
+      {
+        "name": "email",
+        "type": "string",
+        "comment": "邮箱（保留空值，缺失可追溯）"
+      },
+      {
+        "name": "email_domain",
+        "type": "string",
+        "comment": "邮箱域名（字段拆分）"
+      },
+      {
+        "name": "age_filled",
+        "type": "int",
+        "comment": "1=年龄为空或越界，已用中位数填充"
+      },
+      {
+        "name": "gender_filled",
+        "type": "int",
+        "comment": "1=性别为空，已规范为未知"
+      },
+      {
+        "name": "member_level_filled",
+        "type": "int",
+        "comment": "1=等级为空，已规范为未知"
+      },
+      {
+        "name": "email_missing",
+        "type": "int",
+        "comment": "1=邮箱缺失"
+      }
+    ],
+    "n_cols": 20,
+    "rows": 1000
+  },
+  {
+    "db": "ydsh_dwd",
+    "table": "dim_product",
+    "full_name": "ydsh_dwd.dim_product",
+    "desc": "商品维度表",
+    "columns": [
+      {
+        "name": "product_id",
+        "type": "string",
+        "comment": "商品编号（主键）"
+      },
+      {
+        "name": "product_name",
+        "type": "string",
+        "comment": "商品名称"
+      },
+      {
+        "name": "category",
+        "type": "string",
+        "comment": "一级类目（已去首尾空格）"
+      },
+      {
+        "name": "sub_category",
+        "type": "string",
+        "comment": "二级类目"
+      },
+      {
+        "name": "brand",
+        "type": "string",
+        "comment": "品牌"
+      },
+      {
+        "name": "price",
+        "type": "double",
+        "comment": "售价（异常已置空，可追溯）"
+      },
+      {
+        "name": "price_flag",
+        "type": "int",
+        "comment": "0=正常 1=负价格修正 2=超大价格置空"
+      },
+      {
+        "name": "stock",
+        "type": "int",
+        "comment": "库存"
+      },
+      {
+        "name": "status",
+        "type": "string",
+        "comment": "商品状态"
+      },
+      {
+        "name": "launch_date",
+        "type": "string",
+        "comment": "上架日期 yyyy-MM-dd"
+      },
+      {
+        "name": "launch_filled",
+        "type": "int",
+        "comment": "1=上架日期缺失已按类目中位数补全"
+      }
+    ],
+    "n_cols": 11,
+    "rows": 600
+  },
+  {
+    "db": "ydsh_dwd",
+    "table": "dim_store",
+    "full_name": "ydsh_dwd.dim_store",
+    "desc": "门店维度表",
+    "columns": [
+      {
+        "name": "store_id",
+        "type": "string",
+        "comment": "门店编号（主键）"
+      },
+      {
+        "name": "store_name",
+        "type": "string",
+        "comment": "门店名称"
+      },
+      {
+        "name": "province",
+        "type": "string",
+        "comment": "省份"
+      },
+      {
+        "name": "city",
+        "type": "string",
+        "comment": "城市"
+      },
+      {
+        "name": "district",
+        "type": "string",
+        "comment": "区县"
+      },
+      {
+        "name": "region",
+        "type": "string",
+        "comment": "省份-城市"
+      },
+      {
+        "name": "address",
+        "type": "string",
+        "comment": "详细地址"
+      },
+      {
+        "name": "open_date",
+        "type": "string",
+        "comment": "开业日期"
+      },
+      {
+        "name": "area",
+        "type": "int",
+        "comment": "营业面积"
+      },
+      {
+        "name": "manager",
+        "type": "string",
+        "comment": "店长"
+      }
+    ],
+    "n_cols": 10,
+    "rows": 60
+  },
+  {
+    "db": "ydsh_dws",
+    "table": "dws_sales_daily",
+    "full_name": "ydsh_dws.dws_sales_daily",
+    "desc": "日销售汇总（第2周）",
+    "columns": [
+      {
+        "name": "order_date",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "order_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "valid_order_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "gmv",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "aov",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "buyer_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "item_qty",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "item_amount",
+        "type": "double",
+        "comment": ""
+      }
+    ],
+    "n_cols": 8,
+    "rows": 366
+  },
+  {
+    "db": "ydsh_dws",
+    "table": "dws_category_sales",
+    "full_name": "ydsh_dws.dws_category_sales",
+    "desc": "品类销售汇总（第2周）",
+    "columns": [
+      {
+        "name": "category",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "order_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "item_qty",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "item_sales",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "gmv",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "gmv_share_pct",
+        "type": "double",
+        "comment": ""
+      }
+    ],
+    "n_cols": 6,
+    "rows": 8
+  },
+  {
+    "db": "ydsh_dws",
+    "table": "dws_region_sales",
+    "full_name": "ydsh_dws.dws_region_sales",
+    "desc": "区域销售汇总（第2周）",
+    "columns": [
+      {
+        "name": "province",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "region",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "buyer_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "order_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "gmv",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "aov",
+        "type": "double",
+        "comment": ""
+      }
+    ],
+    "n_cols": 6,
+    "rows": 63
+  },
+  {
+    "db": "ydsh_dws",
+    "table": "dws_store_sales",
+    "full_name": "ydsh_dws.dws_store_sales",
+    "desc": "门店销售汇总（第2周）",
+    "columns": [
+      {
+        "name": "store_id",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "store_name",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "province",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "city",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "district",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "area",
+        "type": "int",
+        "comment": ""
+      },
+      {
+        "name": "open_date",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "order_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "buyer_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "gmv",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "aov",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "gmv_per_sqm",
+        "type": "double",
+        "comment": ""
+      }
+    ],
+    "n_cols": 12,
+    "rows": 60
+  },
+  {
+    "db": "ydsh_dws",
+    "table": "dws_channel_pay",
+    "full_name": "ydsh_dws.dws_channel_pay",
+    "desc": "渠道×支付方式汇总（第2周）",
+    "columns": [
+      {
+        "name": "channel",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "pay_type",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "order_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "gmv",
+        "type": "double",
+        "comment": ""
+      }
+    ],
+    "n_cols": 4,
+    "rows": 16
+  },
+  {
+    "db": "ydsh_dws",
+    "table": "dws_sales_week",
+    "full_name": "ydsh_dws.dws_sales_week",
+    "desc": "周销售汇总（第3周）",
+    "columns": [
+      {
+        "name": "week_start",
+        "type": "date",
+        "comment": ""
+      },
+      {
+        "name": "week_end",
+        "type": "date",
+        "comment": ""
+      },
+      {
+        "name": "active_days",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "order_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "valid_order_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "gmv",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "aov",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "buyer_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "avg_daily_gmv",
+        "type": "double",
+        "comment": ""
+      }
+    ],
+    "n_cols": 9,
+    "rows": 53
+  },
+  {
+    "db": "ydsh_dws",
+    "table": "dws_sales_month",
+    "full_name": "ydsh_dws.dws_sales_month",
+    "desc": "月销售汇总（第3周）",
+    "columns": [
+      {
+        "name": "ym",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "active_days",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "order_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "valid_order_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "gmv",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "aov",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "buyer_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "avg_daily_gmv",
+        "type": "double",
+        "comment": ""
+      }
+    ],
+    "n_cols": 8,
+    "rows": 12
+  },
+  {
+    "db": "ydsh_dws",
+    "table": "dws_user_rfm",
+    "full_name": "ydsh_dws.dws_user_rfm",
+    "desc": "用户 RFM 分层明细（第3周）",
+    "columns": [
+      {
+        "name": "user_id",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "recency_days",
+        "type": "int",
+        "comment": ""
+      },
+      {
+        "name": "freq",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "monetary",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "r_score",
+        "type": "int",
+        "comment": ""
+      },
+      {
+        "name": "f_score",
+        "type": "int",
+        "comment": ""
+      },
+      {
+        "name": "m_score",
+        "type": "int",
+        "comment": ""
+      },
+      {
+        "name": "rfm_code",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "segment",
+        "type": "string",
+        "comment": ""
+      }
+    ],
+    "n_cols": 9,
+    "rows": 1000
+  },
+  {
+    "db": "ydsh_ads",
+    "table": "ads_kpi_week3",
+    "full_name": "ydsh_ads.ads_kpi_week3",
+    "desc": "核心 KPI 总览（第3周）",
+    "columns": [
+      {
+        "name": "kpi_name",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "kpi_value",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "unit",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "calc_desc",
+        "type": "string",
+        "comment": ""
+      }
+    ],
+    "n_cols": 4,
+    "rows": 10
+  },
+  {
+    "db": "ydsh_ads",
+    "table": "ads_sales_daily_report",
+    "full_name": "ydsh_ads.ads_sales_daily_report",
+    "desc": "销售日报（含环比/周同比，第3周）",
+    "columns": [
+      {
+        "name": "order_date",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "order_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "valid_order_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "gmv",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "aov",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "buyer_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "item_qty",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "items_per_order",
+        "type": "decimal(24,2)",
+        "comment": ""
+      },
+      {
+        "name": "discount_rate_pct",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "new_cust_orders",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "old_cust_orders",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "dod_pct",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "wow_pct",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "ma7",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "ma30",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "sd30",
+        "type": "double",
+        "comment": ""
+      }
+    ],
+    "n_cols": 16,
+    "rows": 366
+  },
+  {
+    "db": "ydsh_ads",
+    "table": "ads_category_topn",
+    "full_name": "ydsh_ads.ads_category_topn",
+    "desc": "品类销售排行（第3周）",
+    "columns": [
+      {
+        "name": "rank_no",
+        "type": "int",
+        "comment": ""
+      },
+      {
+        "name": "category",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "order_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "item_qty",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "gmv",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "gmv_share_pct",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "aov",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "topn_group",
+        "type": "string",
+        "comment": ""
+      }
+    ],
+    "n_cols": 8,
+    "rows": 8
+  },
+  {
+    "db": "ydsh_ads",
+    "table": "ads_region_rank",
+    "full_name": "ydsh_ads.ads_region_rank",
+    "desc": "省份销售排行（第2周）",
+    "columns": [
+      {
+        "name": "rank_no",
+        "type": "int",
+        "comment": ""
+      },
+      {
+        "name": "province",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "gmv",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "buyer_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "order_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "aov",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "share_pct",
+        "type": "double",
+        "comment": ""
+      }
+    ],
+    "n_cols": 7,
+    "rows": 15
+  },
+  {
+    "db": "ydsh_ads",
+    "table": "ads_store_rank",
+    "full_name": "ydsh_ads.ads_store_rank",
+    "desc": "门店销售排行（第2周）",
+    "columns": [
+      {
+        "name": "rank_no",
+        "type": "int",
+        "comment": ""
+      },
+      {
+        "name": "store_id",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "store_name",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "province",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "city",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "area",
+        "type": "int",
+        "comment": ""
+      },
+      {
+        "name": "order_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "buyer_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "gmv",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "aov",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "gmv_per_sqm",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "share_pct",
+        "type": "double",
+        "comment": ""
+      }
+    ],
+    "n_cols": 12,
+    "rows": 60
+  },
+  {
+    "db": "ydsh_ads",
+    "table": "ads_user_rfm_segment",
+    "full_name": "ydsh_ads.ads_user_rfm_segment",
+    "desc": "用户 RFM 分层汇总（第3周）",
+    "columns": [
+      {
+        "name": "segment",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "user_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "user_share_pct",
+        "type": "decimal(26,2)",
+        "comment": ""
+      },
+      {
+        "name": "gmv",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "gmv_share_pct",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "avg_monetary",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "avg_freq",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "avg_recency_days",
+        "type": "double",
+        "comment": ""
+      }
+    ],
+    "n_cols": 8,
+    "rows": 5
+  },
+  {
+    "db": "ydsh_ads",
+    "table": "ads_monthly_report",
+    "full_name": "ydsh_ads.ads_monthly_report",
+    "desc": "月报（第3周）",
+    "columns": [
+      {
+        "name": "ym",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "active_days",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "order_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "gmv",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "aov",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "buyer_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "avg_daily_gmv",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "mom_pct",
+        "type": "double",
+        "comment": ""
+      }
+    ],
+    "n_cols": 8,
+    "rows": 12
+  },
+  {
+    "db": "ydsh_ads",
+    "table": "ads_anomaly_daily",
+    "full_name": "ydsh_ads.ads_anomaly_daily",
+    "desc": "异常日明细（第3周）",
+    "columns": [
+      {
+        "name": "order_date",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "gmv",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "ma30",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "sd30",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "z_score",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "anomaly_type",
+        "type": "string",
+        "comment": ""
+      },
+      {
+        "name": "wow_pct",
+        "type": "double",
+        "comment": ""
+      },
+      {
+        "name": "order_cnt",
+        "type": "bigint",
+        "comment": ""
+      },
+      {
+        "name": "aov",
+        "type": "double",
+        "comment": ""
+      }
+    ],
+    "n_cols": 9,
+    "rows": 11
+  }
+]

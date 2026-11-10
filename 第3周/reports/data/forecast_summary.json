@@ -1,0 +1,128 @@
+{
+  "series": {
+    "days": 366,
+    "start": "2024-01-01",
+    "end": "2024-12-31",
+    "gmv_total": 37027857.67,
+    "gmv_mean": 101169.01,
+    "gmv_std": 18672.3,
+    "gmv_min": 50273.3,
+    "gmv_max": 156210.93
+  },
+  "decompose": {
+    "residual_std": 17448.81,
+    "residual_std_pct": 17.25,
+    "best_weekday": "周二",
+    "best_weekday_effect": 3582.95,
+    "worst_weekday": "周一",
+    "worst_weekday_effect": -4549.94,
+    "weekday_effects": {
+      "周一": -4549.94,
+      "周二": 3582.95,
+      "周三": 217.31,
+      "周四": -3123.12,
+      "周五": 1249.35,
+      "周六": -672.36,
+      "周日": 3084.4
+    }
+  },
+  "backtest": {
+    "n_test": 28,
+    "metrics": [
+      {
+        "model": "季节调整+线性回归",
+        "MAE": 11940.79,
+        "RMSE": 15789.91,
+        "MAPE": 11.54,
+        "sMAPE": 11.59
+      },
+      {
+        "model": "岭回归",
+        "MAE": 12899.27,
+        "RMSE": 17411.4,
+        "MAPE": 12.42,
+        "sMAPE": 12.53
+      },
+      {
+        "model": "线性回归",
+        "MAE": 12914.72,
+        "RMSE": 17420.27,
+        "MAPE": 12.43,
+        "sMAPE": 12.54
+      },
+      {
+        "model": "XGBoost",
+        "MAE": 15355.87,
+        "RMSE": 18527.47,
+        "MAPE": 15.39,
+        "sMAPE": 14.91
+      },
+      {
+        "model": "朴素基线(lag1)",
+        "MAE": 19849.59,
+        "RMSE": 24445.98,
+        "MAPE": 19.88,
+        "sMAPE": 19.15
+      }
+    ],
+    "best_model": "季节调整+线性回归"
+  },
+  "diagnosis": {
+    "hist_cv_pct": 18.46,
+    "pred_cv_pct": 3.05,
+    "cv_ratio_pct": 16.52,
+    "is_flat": false,
+    "pred_range": 8069.02
+  },
+  "diagnosis_plain_recursive": {
+    "hist_cv_pct": 18.46,
+    "pred_cv_pct": 0.95,
+    "cv_ratio_pct": 5.12,
+    "is_flat": true,
+    "pred_range": 3091.35
+  },
+  "forecast": {
+    "horizon": 7,
+    "total": 709609.39,
+    "mean": 101372.77,
+    "rows": [
+      {
+        "date": "2025-01-01",
+        "weekday": "周三",
+        "pred_gmv": 102742.7
+      },
+      {
+        "date": "2025-01-02",
+        "weekday": "周四",
+        "pred_gmv": 98069.16
+      },
+      {
+        "date": "2025-01-03",
+        "weekday": "周五",
+        "pred_gmv": 102793.28
+      },
+      {
+        "date": "2025-01-04",
+        "weekday": "周六",
+        "pred_gmv": 100350.49
+      },
+      {
+        "date": "2025-01-05",
+        "weekday": "周日",
+        "pred_gmv": 104209.82
+      },
+      {
+        "date": "2025-01-06",
+        "weekday": "周一",
+        "pred_gmv": 96687.46
+      },
+      {
+        "date": "2025-01-07",
+        "weekday": "周二",
+        "pred_gmv": 104756.48
+      }
+    ]
+  },
+  "font": "Microsoft YaHei",
+  "xgboost_available": true
+}

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>第 3 周 · 云仓五号 经营分析看板</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    margin: 0; padding: 0; background: #f5f7fa; color: #24303f;
+  }
+  header {
+    background: linear-gradient(135deg, #1f4e79 0%, #2e7ebd 100%);
+    color: #fff; padding: 32px 40px;
+  }
+  header h1 { margin: 0 0 6px; font-size: 26px; font-weight: 600; }
+  header .sub { opacity: .85; font-size: 14px; }
+  main { padding: 24px 40px 60px; max-width: 1500px; margin: 0 auto; }
+  h2 {
+    font-size: 18px; margin: 34px 0 14px; padding-left: 10px;
+    border-left: 4px solid #2e7ebd;
+  }
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 14px;
+  }
+  .kpi {
+    background: #fff; border-radius: 8px; padding: 16px 18px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  }
+  .kpi-name { font-size: 13px; color: #6b7c93; }
+  .kpi-val { font-size: 24px; font-weight: 700; color: #1f4e79; margin: 6px 0; }
+  .kpi-val .unit { font-size: 12px; font-weight: 400; color: #8a9bb0; margin-left: 4px; }
+  .kpi-desc { font-size: 11px; color: #9aa9bb; line-height: 1.4; }
+  .panel {
+    background: #fff; border-radius: 8px; padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  }
+  .bar-row { display: flex; align-items: center; margin: 7px 0; font-size: 13px; }
+  .bar-label { width: 92px; flex: none; color: #4a5b70; }
+  .bar-track { flex: 1; background: #eef2f7; border-radius: 4px; height: 18px; margin: 0 10px; }
+  .bar-fill { height: 100%; border-radius: 4px; background: #2e7ebd; }
+  .bar-fill.alt { background: #59a14f; }
+  .bar-val { width: 190px; flex: none; text-align: right; color: #24303f; font-variant-numeric: tabular-nums; }
+  .bar-val em { font-style: normal; font-size: 11px; margin-left: 6px; }
+  em.up, .up { color: #c0392b; }
+  em.down, .down { color: #27ae60; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #eef2f7; }
+  th { background: #f8fafc; color: #4a5b70; font-weight: 600; font-size: 12px; }
+  td.sql { font-family: Consolas, monospace; font-size: 11px; color: #6b7c93; }
+  tr.best { background: #eaf6ea; font-weight: 600; }
+  .tag { padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+  .tag.up { background: #fdecea; }
+  .tag.down { background: #eaf6ea; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .summary-text { font-size: 14px; line-height: 1.9; color: #33475e; }
+  .summary-text p { margin: 0 0 12px; }
+  .note { font-size: 12px; color: #8a9bb0; margin-top: 10px; }
+  footer { text-align: center; color: #9aa9bb; font-size: 12px; padding: 30px; }
+  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } main { padding: 16px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>云仓五号 · 第 3 周经营分析看板</h1>
+  <div class="sub">数据分析 · 预测建模 · AI 协同（NL2SQL）　|　数据区间 2024-01-01 ～ 2024-12-31　|　生成时间 2026-11-09 09:44</div>
+</header>
+<main>
+
+  <h2>一、核心 KPI</h2>
+  <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-name">总 GMV</div>
+          <div class="kpi-val">37,027,857.67<span class="unit">元</span></div>
+          <div class="kpi-desc">有效订单实付金额之和</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-name">日均 GMV</div>
+          <div class="kpi-val">101,169.01<span class="unit">元</span></div>
+          <div class="kpi-desc">366 天日 GMV 均值</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-name">订单量</div>
+          <div class="kpi-val">15,000.00<span class="unit">单</span></div>
+          <div class="kpi-desc">dwd_order 去重行数</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-name">有效订单量</div>
+          <div class="kpi-val">14,696.00<span class="unit">单</span></div>
+          <div class="kpi-desc">is_valid_amount=1</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-name">客单价 AOV</div>
+          <div class="kpi-val">2,519.59<span class="unit">元</span></div>
+          <div class="kpi-desc">GMV ÷ 有效订单量</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-name">活跃用户数</div>
+          <div class="kpi-val">1,000.00<span class="unit">人</span></div>
+          <div class="kpi-desc">有有效下单行为的去重用户</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-name">复购用户数</div>
+          <div class="kpi-val">1,000.00<span class="unit">人</span></div>
+          <div class="kpi-desc">有效订单数 &gt;= 2 的用户</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-name">复购率</div>
+          <div class="kpi-val">100.00<span class="unit">%</span></div>
+          <div class="kpi-desc">复购用户数 ÷ 活跃用户数（本数据集饱和，见指标定义文档第五节）</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-name">门店数</div>
+          <div class="kpi-val">60.00<span class="unit">家</span></div>
+          <div class="kpi-desc">dim_store 行数</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-name">客单件数</div>
+          <div class="kpi-val">7.37<span class="unit">件/单</span></div>
+          <div class="kpi-desc">明细件数 ÷ 有效订单量</div>
+        </div></div>
+
+  <h2>二、品类销售结构</h2>
+  <div class="panel">
+        <div class="bar-row">
+          <span class="bar-label">运动户外</span>
+          <div class="bar-track"><div class="bar-fill" style="width:100.0%"></div></div>
+          <span class="bar-val">5,474,187（14.88%）</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">数码家电</span>
+          <div class="bar-track"><div class="bar-fill" style="width:92.1%"></div></div>
+          <span class="bar-val">5,040,379（13.70%）</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">服饰鞋包</span>
+          <div class="bar-track"><div class="bar-fill" style="width:84.3%"></div></div>
+          <span class="bar-val">4,613,403（12.54%）</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">图书文娱</span>
+          <div class="bar-track"><div class="bar-fill" style="width:83.7%"></div></div>
+          <span class="bar-val">4,581,968（12.45%）</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">食品生鲜</span>
+          <div class="bar-track"><div class="bar-fill" style="width:82.4%"></div></div>
+          <span class="bar-val">4,512,589（12.26%）</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">家居生活</span>
+          <div class="bar-track"><div class="bar-fill" style="width:78.5%"></div></div>
+          <span class="bar-val">4,294,532（11.67%）</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">美妆个护</span>
+          <div class="bar-track"><div class="bar-fill" style="width:76.4%"></div></div>
+          <span class="bar-val">4,183,903（11.37%）</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">母婴玩具</span>
+          <div class="bar-track"><div class="bar-fill" style="width:74.8%"></div></div>
+          <span class="bar-val">4,093,688（11.13%）</span>
+        </div>
+    <div class="note">品类 GMV 按明细金额占比分摊订单实付，覆盖总 GMV 的 99.37%，占比合计不为 100%。</div>
+  </div>
+
+  <h2>三、月度趋势</h2>
+  <div class="panel">
+        <div class="bar-row">
+          <span class="bar-label">2024-01</span>
+          <div class="bar-track"><div class="bar-fill alt" style="width:100.0%"></div></div>
+          <span class="bar-val">3,211,883 <em class="down">+nan%</em></span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">2024-02</span>
+          <div class="bar-track"><div class="bar-fill alt" style="width:93.4%"></div></div>
+          <span class="bar-val">3,000,286 <em class="down">-6.59%</em></span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">2024-03</span>
+          <div class="bar-track"><div class="bar-fill alt" style="width:98.5%"></div></div>
+          <span class="bar-val">3,163,010 <em class="up">+5.42%</em></span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">2024-04</span>
+          <div class="bar-track"><div class="bar-fill alt" style="width:96.2%"></div></div>
+          <span class="bar-val">3,091,403 <em class="down">-2.26%</em></span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">2024-05</span>
+          <div class="bar-track"><div class="bar-fill alt" style="width:99.4%"></div></div>
+          <span class="bar-val">3,192,180 <em class="up">+3.26%</em></span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">2024-06</span>
+          <div class="bar-track"><div class="bar-fill alt" style="width:90.3%"></div></div>
+          <span class="bar-val">2,901,575 <em class="down">-9.10%</em></span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">2024-07</span>
+          <div class="bar-track"><div class="bar-fill alt" style="width:95.3%"></div></div>
+          <span class="bar-val">3,060,684 <em class="up">+5.48%</em></span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">2024-08</span>
+          <div class="bar-track"><div class="bar-fill alt" style="width:96.8%"></div></div>
+          <span class="bar-val">3,108,833 <em class="up">+1.57%</em></span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">2024-09</span>
+          <div class="bar-track"><div class="bar-fill alt" style="width:93.5%"></div></div>
+          <span class="bar-val">3,002,013 <em class="down">-3.44%</em></span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">2024-10</span>
+          <div class="bar-track"><div class="bar-fill alt" style="width:94.6%"></div></div>
+          <span class="bar-val">3,039,817 <em class="up">+1.26%</em></span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">2024-11</span>
+          <div class="bar-track"><div class="bar-fill alt" style="width:95.2%"></div></div>
+          <span class="bar-val">3,059,188 <em class="up">+0.64%</em></span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">2024-12</span>
+          <div class="bar-track"><div class="bar-fill alt" style="width:99.5%"></div></div>
+          <span class="bar-val">3,196,986 <em class="up">+4.50%</em></span>
+        </div>
+    <div class="note">环比 =（本月 GMV − 上月 GMV）÷ 上月 GMV。红字为上升，绿字为下降。</div>
+  </div>
+
+  <h2>四、用户价值分层（RFM）</h2>
+  <div class="panel">
+    <table>
+      <tr><th>分层</th><th>用户数</th><th>用户占比</th><th>GMV（元）</th><th>GMV 占比</th></tr>
+      <tr><td>一般客户</td><td>444</td><td>44.40%</td><td>14,249,215.36</td><td>38.48%</td></tr><tr><td>重要保持客户</td><td>182</td><td>18.20%</td><td>8,842,821.39</td><td>23.88%</td></tr><tr><td>重要价值客户</td><td>134</td><td>13.40%</td><td>6,816,154.25</td><td>18.41%</td></tr><tr><td>流失预警</td><td>207</td><td>20.70%</td><td>5,717,560.01</td><td>15.44%</td></tr><tr><td>重要发展客户</td><td>33</td><td>3.30%</td><td>1,402,106.66</td><td>3.79%</td></tr>
+    </table>
+    <div class="note">R/F/M 各按 ntile(5) 打分，规则见《指标定义文档》第八节。</div>
+  </div>
+
+  <h2>五、门店 Top 10</h2>
+  <div class="panel">
+    <table>
+      <tr><th>排名</th><th>门店</th><th>省份</th><th>GMV（元）</th><th>坪效（元/㎡）</th></tr>
+      <tr><td>1</td><td>云购生活·绍兴旗舰店</td><td>浙江省</td><td>722,457.44</td><td>1,480.45</td></tr><tr><td>2</td><td>云购生活·北京二店</td><td>北京市</td><td>713,114.38</td><td>5,571.21</td></tr><tr><td>3</td><td>云购生活·合肥购物中心店</td><td>安徽省</td><td>707,147.03</td><td>1,229.82</td></tr><tr><td>4</td><td>云购生活·莆田旗舰店</td><td>福建省</td><td>704,669.09</td><td>4,793.67</td></tr><tr><td>5</td><td>云购生活·开封社区店</td><td>河南省</td><td>695,991.28</td><td>1,126.20</td></tr><tr><td>6</td><td>云购生活·株洲一店</td><td>湖南省</td><td>693,051.23</td><td>2,576.40</td></tr><tr><td>7</td><td>云购生活·嘉兴社区店</td><td>浙江省</td><td>687,586.96</td><td>1,002.31</td></tr><tr><td>8</td><td>云购生活·大连二店</td><td>辽宁省</td><td>686,426.41</td><td>1,314.99</td></tr><tr><td>9</td><td>云购生活·德阳购物中心店</td><td>四川省</td><td>676,303.79</td><td>1,229.64</td></tr><tr><td>10</td><td>云购生活·泸州社区店</td><td>四川省</td><td>673,700.55</td><td>3,661.42</td></tr>
+    </table>
+  </div>
+
+  <h2>六、异常日（|z| ≥ 2）</h2>
+  <div class="panel">
+    <table>
+      <tr><th>日期</th><th>GMV（元）</th><th>z 值</th><th>类型</th></tr>
+      <tr><td>2024-07-06</td><td>156,210.93</td><td>+2.47</td><td><span class='tag up'>偏高</span></td></tr><tr><td>2024-01-20</td><td>50,273.30</td><td>-2.34</td><td><span class='tag down'>偏低</span></td></tr><tr><td>2024-10-08</td><td>61,767.79</td><td>-2.34</td><td><span class='tag down'>偏低</span></td></tr><tr><td>2024-12-10</td><td>142,629.19</td><td>+2.28</td><td><span class='tag up'>偏高</span></td></tr><tr><td>2024-06-08</td><td>136,710.95</td><td>+2.27</td><td><span class='tag up'>偏高</span></td></tr><tr><td>2024-06-22</td><td>136,990.78</td><td>+2.26</td><td><span class='tag up'>偏高</span></td></tr><tr><td>2024-09-09</td><td>59,214.67</td><td>-2.12</td><td><span class='tag down'>偏低</span></td></tr><tr><td>2024-03-14</td><td>69,776.71</td><td>-2.11</td><td><span class='tag down'>偏低</span></td></tr>
+    </table>
+    <div class="note">z =（当日 GMV − 近 30 日均值）÷ 近 30 日标准差。</div>
+  </div>
+
+  <h2>七、预测建模</h2>
+  <div class="two-col">
+    <div class="panel">
+      <table>
+        <tr><th>模型</th><th>MAE</th><th>RMSE</th><th>MAPE</th><th>sMAPE</th></tr>
+        <tr class='best'><td>季节调整+线性回归</td><td>11,940.79</td><td>15,789.91</td><td>11.54%</td><td>11.59%</td></tr><tr class=''><td>岭回归</td><td>12,899.27</td><td>17,411.40</td><td>12.42%</td><td>12.53%</td></tr><tr class=''><td>线性回归</td><td>12,914.72</td><td>17,420.27</td><td>12.43%</td><td>12.54%</td></tr><tr class=''><td>XGBoost</td><td>15,355.87</td><td>18,527.47</td><td>15.39%</td><td>14.91%</td></tr><tr class=''><td>朴素基线(lag1)</td><td>19,849.59</td><td>24,445.98</td><td>19.88%</td><td>19.15%</td></tr>
+      </table>
+      <div class="note">绿色行为最优模型；滚动回测最后 28 天，逐日训练。</div>
+    </div>
+    <div class="panel">
+      <table>
+        <tr><th>日期</th><th>星期</th><th>预测 GMV（元）</th></tr>
+        <tr><td>2025-01-01</td><td>周三</td><td>102,742.70</td></tr><tr><td>2025-01-02</td><td>周四</td><td>98,069.16</td></tr><tr><td>2025-01-03</td><td>周五</td><td>102,793.28</td></tr><tr><td>2025-01-04</td><td>周六</td><td>100,350.49</td></tr><tr><td>2025-01-05</td><td>周日</td><td>104,209.82</td></tr><tr><td>2025-01-06</td><td>周一</td><td>96,687.46</td></tr><tr><td>2025-01-07</td><td>周二</td><td>104,756.48</td></tr>
+      </table>
+      <div class="note">未来 7 天合计 709,609.39 元。</div>
+    </div>
+  </div>
+
+  <h2>八、NL2SQL 测试结果</h2>
+  <div class="panel">
+    <table>
+      <tr><th></th><th>问题</th><th>生成的 SQL</th><th>行数</th><th>耗时</th><th>模式</th></tr>
+      <tr>
+          <td>✅</td><td>广东省上月销售额是多少？</td>
+          <td class="sql">select rank_no as `排名`, province as `省份`, round(gmv, 2) as `销售额`, share_pct as `占比%` from ydsh_ads.ads_region_…</td>
+          <td>10</td><td>0.73s</td>
+          <td>rule_based</td></tr><tr>
+          <td>✅</td><td>销量最高的前 5 个品类</td>
+          <td class="sql">select rank_no as `排名`, category as `品类`, round(gmv, 2) as `销售额`, gmv_share_pct as `占比%` from ydsh_ads.ads_cat…</td>
+          <td>5</td><td>0.76s</td>
+          <td>rule_based</td></tr><tr>
+          <td>✅</td><td>每个月的 GMV 是多少</td>
+          <td class="sql">select ym as `月份`, round(gmv, 2) as `GMV`, round(aov, 2) as `客单价`, mom_pct as `环比%` from ydsh_ads.ads_monthly_…</td>
+          <td>12</td><td>0.75s</td>
+          <td>rule_based</td></tr><tr>
+          <td>✅</td><td>复购率是多少</td>
+          <td class="sql">select kpi_name as `指标`, round(kpi_value, 2) as `数值`, unit as `单位`, calc_desc as `口径` from ydsh_ads.ads_kpi_we…</td>
+          <td>2</td><td>0.15s</td>
+          <td>rule_based</td></tr><tr>
+          <td>✅</td><td>哪些天 GMV 出现异常波动</td>
+          <td class="sql">select order_date as `日期`, round(gmv, 2) as `GMV`, z_score as `z值`, anomaly_type as `类型` from ydsh_ads.ads_ano…</td>
+          <td>10</td><td>0.76s</td>
+          <td>rule_based</td></tr><tr>
+          <td>✅</td><td>用户价值分层各有多少人</td>
+          <td class="sql">select segment as `分层`, user_cnt as `用户数`, user_share_pct as `用户占比%`, round(gmv, 2) as `GMV`, gmv_share_pct as…</td>
+          <td>5</td><td>0.7s</td>
+          <td>rule_based</td></tr><tr>
+          <td>✅</td><td>哪个门店卖得最好</td>
+          <td class="sql">select rank_no as `排名`, store_name as `门店`, province as `省份`, round(gmv, 2) as `销售额`, gmv_per_sqm as `坪效` from…</td>
+          <td>10</td><td>0.64s</td>
+          <td>rule_based</td></tr><tr>
+          <td>✅</td><td>各渠道的销售占比</td>
+          <td class="sql">select channel as `渠道`, sum(order_cnt) as `订单量`, round(sum(gmv), 2) as `销售额` from ydsh_dws.dws_channel_pay gro…</td>
+          <td>4</td><td>0.89s</td>
+          <td>rule_based</td></tr>
+    </table>
+    <div class="note">模式 rule_based 表示当前未配置 API Key，走规则引擎兜底；配置 Key 后自动切换为大模型生成。</div>
+  </div>
+
+  <h2>九、AI 经营分析摘要</h2>
+  <div class="panel">
+    <div class="summary-text"><p>整体表现：2024 年全年 GMV 为 37,027,857.67 元，订单量 15,000 单，其中有效订单 14,696 单，客单价 2,519.59 元，日均 GMV 101,169.01 元。活跃用户 1,000 人，覆盖 60 家门店，人均客单件数 7.37 件。</p><p>结构特征：品类上，运动户外以 14.88% 的占比居首，贡献 5,474,186.74 元；母婴玩具占比最低，为 11.13%，八个品类占比集中在 11%~15% 区间，结构相对均衡。月份上，2024-01 为全年高点（3,211,882.66 元），2024-06 为低点（2,901,575.33 元），月度平均波动 3.96%，全年无明显增长或衰退趋势。渠道以 APP 为主，贡献 9,430,444.23 元。</p><p>风险与建议：用户分层看，重要价值客户 134 人，贡献 18.41% 的 GMV；流失预警客户 207 人，仍占 15.44% 的 GMV，存在流失带来的收入缺口。需要特别说明：复购率显示 100.0%，但这是因为 1,000 名用户分摊 15,000 单、人均下单超过 10 次，该指标在本数据集上已饱和，不能作为用户粘性强的证据。建议：一是对 207 名流失预警客户做定向唤回，优先投入 GMV 贡献高的子群；二是补采 2023 年数据，否则无法判断当前是自然波动还是趋势性变化。</p></div>
+    <div class="note">生成模式：offline_template
+      ｜ 数字校验通过率：100%</div>
+  </div>
+
+</main>
+<footer>云仓五号 · 企业级数据仓库与经营分析可视化系统 · 第 3 周</footer>
+</body>
+</html>

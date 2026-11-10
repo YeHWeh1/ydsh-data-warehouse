@@ -1,0 +1,243 @@
+ydsh_dwd.dwd_order — 订单事实表（一行一单）（15,000 行）
+  order_id string  订单编号（主键）
+  user_id string  用户编号（外键 → dim_user）
+  store_id string  门店编号（外键 → dim_store）
+  order_timestamp string  下单完整时间 yyyy-MM-dd HH:mm:ss（日期+时间合并）
+  order_hour int  下单小时（时间字段拆分）
+  pay_amount double  实付金额（负值已取绝对值，超大值已置空）
+  discount_amount double  优惠金额
+  net_amount double  净额 = 实付 - 优惠
+  pay_type_code string  支付方式编码（关联 dim_pay_type）
+  pay_type string  支付方式中文名
+  order_status_code string  订单状态编码
+  order_status string  订单状态中文名
+  channel_code string  渠道编码
+  channel string  下单渠道
+  amount_flag int  0=正常 1=负金额已修正 2=超大金额已置空
+  discount_flag int  1=负优惠金额已修正
+  is_valid_amount int  1=金额可参与统计
+  order_date string  下单日期分区键
+
+ydsh_dwd.dwd_order_item — 订单明细事实表（一行一商品）（37,549 行）
+  item_id string  明细编号（主键）
+  order_id string  订单编号（外键 → dwd_order）
+  product_id string  商品编号（外键 → dim_product）
+  quantity int  购买数量（0 与超大值已置空）
+  unit_price double  商品单价（负值已修正）
+  discount double  折扣率
+  item_amount double  明细金额 = 数量 × 单价 × (1-折扣)
+  qty_flag int  0=正常 1=负数量修正 2=零数量置空 3=超大数量置空
+  order_date string  下单日期分区键
+
+ydsh_dwd.dim_user — 用户维度表（1,000 行）
+  user_id string  用户编号（主键）
+  user_name string  姓名
+  gender string  性别（规范值：男/女/未知）
+  gender_code string  性别编码 M/F/U
+  age int  年龄（1~120）
+  age_band string  年龄段
+  city string  城市
+  province string  省份
+  region string  省份-城市（字段合并）
+  register_date string  注册日期 yyyy-MM-dd
+  register_month string  注册年月 yyyy-MM
+  member_level_code string  会员等级编码
+  member_level string  会员等级（规范中文）
+  phone string  手机号（11 位纯数字）
+  email string  邮箱（保留空值，缺失可追溯）
+  email_domain string  邮箱域名（字段拆分）
+  age_filled int  1=年龄为空或越界，已用中位数填充
+  gender_filled int  1=性别为空，已规范为未知
+  member_level_filled int  1=等级为空，已规范为未知
+  email_missing int  1=邮箱缺失
+
+ydsh_dwd.dim_product — 商品维度表（600 行）
+  product_id string  商品编号（主键）
+  product_name string  商品名称
+  category string  一级类目（已去首尾空格）
+  sub_category string  二级类目
+  brand string  品牌
+  price double  售价（异常已置空，可追溯）
+  price_flag int  0=正常 1=负价格修正 2=超大价格置空
+  stock int  库存
+  status string  商品状态
+  launch_date string  上架日期 yyyy-MM-dd
+  launch_filled int  1=上架日期缺失已按类目中位数补全
+
+ydsh_dwd.dim_store — 门店维度表（60 行）
+  store_id string  门店编号（主键）
+  store_name string  门店名称
+  province string  省份
+  city string  城市
+  district string  区县
+  region string  省份-城市
+  address string  详细地址
+  open_date string  开业日期
+  area int  营业面积
+  manager string  店长
+
+ydsh_dws.dws_sales_daily — 日销售汇总（第2周）（366 行）
+  order_date string
+  order_cnt bigint
+  valid_order_cnt bigint
+  gmv double
+  aov double
+  buyer_cnt bigint
+  item_qty bigint
+  item_amount double
+
+ydsh_dws.dws_category_sales — 品类销售汇总（第2周）（8 行）
+  category string
+  order_cnt bigint
+  item_qty bigint
+  item_sales double
+  gmv double
+  gmv_share_pct double
+
+ydsh_dws.dws_region_sales — 区域销售汇总（第2周）（63 行）
+  province string
+  region string
+  buyer_cnt bigint
+  order_cnt bigint
+  gmv double
+  aov double
+
+ydsh_dws.dws_store_sales — 门店销售汇总（第2周）（60 行）
+  store_id string
+  store_name string
+  province string
+  city string
+  district string
+  area int
+  open_date string
+  order_cnt bigint
+  buyer_cnt bigint
+  gmv double
+  aov double
+  gmv_per_sqm double
+
+ydsh_dws.dws_channel_pay — 渠道×支付方式汇总（第2周）（16 行）
+  channel string
+  pay_type string
+  order_cnt bigint
+  gmv double
+
+ydsh_dws.dws_sales_week — 周销售汇总（第3周）（53 行）
+  week_start date
+  week_end date
+  active_days bigint
+  order_cnt bigint
+  valid_order_cnt bigint
+  gmv double
+  aov double
+  buyer_cnt bigint
+  avg_daily_gmv double
+
+ydsh_dws.dws_sales_month — 月销售汇总（第3周）（12 行）
+  ym string
+  active_days bigint
+  order_cnt bigint
+  valid_order_cnt bigint
+  gmv double
+  aov double
+  buyer_cnt bigint
+  avg_daily_gmv double
+
+ydsh_dws.dws_user_rfm — 用户 RFM 分层明细（第3周）（1,000 行）
+  user_id string
+  recency_days int
+  freq bigint
+  monetary double
+  r_score int
+  f_score int
+  m_score int
+  rfm_code string
+  segment string
+
+ydsh_ads.ads_kpi_week3 — 核心 KPI 总览（第3周）（10 行）
+  kpi_name string
+  kpi_value double
+  unit string
+  calc_desc string
+
+ydsh_ads.ads_sales_daily_report — 销售日报（含环比/周同比，第3周）（366 行）
+  order_date string
+  order_cnt bigint
+  valid_order_cnt bigint
+  gmv double
+  aov double
+  buyer_cnt bigint
+  item_qty bigint
+  items_per_order decimal(24,2)
+  discount_rate_pct double
+  new_cust_orders bigint
+  old_cust_orders bigint
+  dod_pct double
+  wow_pct double
+  ma7 double
+  ma30 double
+  sd30 double
+
+ydsh_ads.ads_category_topn — 品类销售排行（第3周）（8 行）
+  rank_no int
+  category string
+  order_cnt bigint
+  item_qty bigint
+  gmv double
+  gmv_share_pct double
+  aov double
+  topn_group string
+
+ydsh_ads.ads_region_rank — 省份销售排行（第2周）（15 行）
+  rank_no int
+  province string
+  gmv double
+  buyer_cnt bigint
+  order_cnt bigint
+  aov double
+  share_pct double
+
+ydsh_ads.ads_store_rank — 门店销售排行（第2周）（60 行）
+  rank_no int
+  store_id string
+  store_name string
+  province string
+  city string
+  area int
+  order_cnt bigint
+  buyer_cnt bigint
+  gmv double
+  aov double
+  gmv_per_sqm double
+  share_pct double
+
+ydsh_ads.ads_user_rfm_segment — 用户 RFM 分层汇总（第3周）（5 行）
+  segment string
+  user_cnt bigint
+  user_share_pct decimal(26,2)
+  gmv double
+  gmv_share_pct double
+  avg_monetary double
+  avg_freq double
+  avg_recency_days double
+
+ydsh_ads.ads_monthly_report — 月报（第3周）（12 行）
+  ym string
+  active_days bigint
+  order_cnt bigint
+  gmv double
+  aov double
+  buyer_cnt bigint
+  avg_daily_gmv double
+  mom_pct double
+
+ydsh_ads.ads_anomaly_daily — 异常日明细（第3周）（11 行）
+  order_date string
+  gmv double
+  ma30 double
+  sd30 double
+  z_score double
+  anomaly_type string
+  wow_pct double
+  order_cnt bigint
+  aov double
