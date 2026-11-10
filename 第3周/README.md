@@ -149,11 +149,11 @@ LLM_PROVIDER=deepseek
 | # | 交付物 | 位置 |
 |---|---|---|
 | 1 | DWS / ADS 建模与 ETL 脚本 | [`sql/dws/50_dws_ext.sql`](sql/dws/50_dws_ext.sql)、[`sql/ads/60_ads_ext.sql`](sql/ads/60_ads_ext.sql) |
-| 2 | KPI 指标结果表 | `ydsh_ads.ads_kpi_week3`（10 项）+ [`docs/第3周_指标定义文档.md`](docs/第3周_指标定义文档.md) |
+| 2 | KPI 指标结果表 | [`docs/第3周_KPI指标结果表.xlsx`](docs/第3周_KPI指标结果表.xlsx)（6 个 sheet）+ `ydsh_ads.ads_kpi_week3` + [`docs/第3周_指标定义文档.md`](docs/第3周_指标定义文档.md) |
 | 3 | 预测建模分析报告 | [`reports/第3周_预测建模分析报告.md`](reports/第3周_预测建模分析报告.md) / `.docx` |
 | 4 | NL2SQL 接口代码 | [`py/nl2sql.py`](py/nl2sql.py) + [`py/schema_extract.py`](py/schema_extract.py) |
 | 5 | AI 智能洞察 / 反思文档 | [`reports/第3周_AI洞察与经营简报.md`](reports/第3周_AI洞察与经营简报.md) + [`docs/第3周_AI应用反思.md`](docs/第3周_AI应用反思.md) |
-| 6 | PR / Code Review / Issue 记录 | [`docs/第3周_Git协同记录.md`](docs/第3周_Git协同记录.md) |
+| 6 | PR / Code Review / Issue 记录 | [`docs/第3周_Git协同记录.md`](docs/第3周_Git协同记录.md)（含 PR [#1](https://github.com/YeHWeh1/ydsh-data-warehouse/pull/1) 真实记录） |
 
 ## 六、说明
 
