@@ -29,8 +29,6 @@ FILES = [
     (DOC_DIR / "第3周_Git协同记录.md", "第3周_Git协同记录.md"),
     (DOC_DIR / "第3周_AI协同日志.md", "第3周_AI协同日志.md"),
     (DOC_DIR / "第3周_答辩手册.md", "第3周_答辩手册.md"),
-    (DOC_DIR / "第3周_项目周记.docx", "第3周_项目周记.docx"),
-    (DOC_DIR / "第3周_项目周记.md", "第3周_项目周记.md"),
     # ---- 报告 Markdown 源 ----
     (REPORT_DIR / "第3周_预测建模分析报告.md", "第3周_预测建模分析报告.md"),
     (REPORT_DIR / "第3周_AI洞察与经营简报.md", "第3周_AI洞察与经营简报.md"),
