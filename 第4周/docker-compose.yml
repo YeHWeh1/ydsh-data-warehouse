@@ -1,0 +1,157 @@
+# ============================================================
+# 第 4 周 · 全栈一键部署编排
+#
+#   docker compose -f 第4周/docker-compose.yml up -d
+#
+# 设计要点（对应任务书子任务 4 与部署手册步骤 5）：
+#   1. 复用第 1 周的 mysql / hive-metastore / hive-server，用 include 引入，
+#      不再复制一份配置，避免两周配置漂移（项目名统一为 dshproject）。
+#   2. 为 hive-server 补 healthcheck —— 第 1 周的编排没有健康检查，
+#      而 superset / app 必须等 Hive 真正可用才能启动。
+#   3. 所有敏感信息走 ${VAR} 引用 .env，yml 内不出现任何真实口令。
+#   4. 服务依赖一律用 condition: service_healthy，不用裸 depends_on。
+#
+# 端口占用（宿主机）：3307 MySQL / 9083 Metastore / 10000 HiveServer2
+#                     8123+9000 ClickHouse / 8088 Superset / 8000 App / 8501 Streamlit
+# ============================================================
+
+name: dshproject
+
+include:
+  - ../第1周/docker-compose.yml
+
+services:
+  # ------------------------------------------------------------
+  # 第 1 周服务的补齐：HiveServer2 健康检查
+  # 容器内自检 10000 端口，供 superset / app 的 depends_on 使用
+  # ------------------------------------------------------------
+  hive-server:
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/10000' && echo ok"]
+      interval: 15s
+      timeout: 5s
+      retries: 40
+      start_period: 120s
+
+  # ------------------------------------------------------------
+  # ClickHouse —— 明细/聚合的高性能查询引擎
+  # 由 initdb 脚本自动建库建表并从 Hive 结果落一份宽表，供大屏秒级查询
+  # ------------------------------------------------------------
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8
+    container_name: clickhouse
+    restart: unless-stopped
+    environment:
+      CLICKHOUSE_DB: ydsh_ads
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-ydsh}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:?CLICKHOUSE_PASSWORD 未设置，请复制 .env.example 为 .env}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    ports:
+      - "8123:8123"   # HTTP 接口（Superset / App 走这个）
+      - "9000:9000"   # 原生 TCP
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - ./clickhouse/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      # 用应用账号自检，顺带验证口令注入是否正确
+      test: ["CMD-SHELL", "clickhouse-client --user $${CLICKHOUSE_USER} --password $${CLICKHOUSE_PASSWORD} --query 'select 1' >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  # ------------------------------------------------------------
+  # Superset —— BI 仪表板
+  # 首次启动自动：建管理员 → 升级元数据库 → 初始化 → 写入数据源
+  # ------------------------------------------------------------
+  superset:
+    image: apache/superset:4.1.2
+    container_name: superset
+    restart: unless-stopped
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      hive-server:
+        condition: service_healthy
+    environment:
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY:?SUPERSET_SECRET_KEY 未设置，请复制 .env.example 为 .env}
+      SUPERSET_CONFIG_PATH: /app/pythonpath/superset_config.py
+      SUPERSET_ADMIN_USER: ${SUPERSET_ADMIN_USER:-admin}
+      SUPERSET_ADMIN_PASSWORD: ${SUPERSET_ADMIN_PASSWORD:?SUPERSET_ADMIN_PASSWORD 未设置}
+      SUPERSET_ADMIN_EMAIL: ${SUPERSET_ADMIN_EMAIL:-admin@example.com}
+      # 数据源连接串由环境变量拼装，yml 里不落任何口令
+      HIVE_CONN_URI: hive://hive@hive-server:10000/ydsh_ads
+      CLICKHOUSE_CONN_URI: clickhousedb://${CLICKHOUSE_USER:-ydsh}:${CLICKHOUSE_PASSWORD}@clickhouse:8123/ydsh_ads
+    ports:
+      - "8088:8088"
+    volumes:
+      - ./superset/superset_config.py:/app/pythonpath/superset_config.py:ro
+      - ./superset/bootstrap.sh:/app/dsh_bootstrap.sh:ro
+      - superset-home:/app/superset_home
+    # 入口脚本：等元数据库 → 初始化 → 注册数据源 → 起服务
+    entrypoint: ["/bin/bash", "/app/dsh_bootstrap.sh"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8088/health >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 40
+      start_period: 180s
+
+  # ------------------------------------------------------------
+  # App —— FastAPI 数据接口 + 静态大屏 + Streamlit 问答
+  # 一个镜像同时提供三种能力，减少服务数量：
+  #   :8000/api/*      JSON 数据接口（ECharts 大屏取数）
+  #   :8000/           ECharts 大屏静态页
+  #   :8501/           Streamlit 对话式问答（NL2SQL）
+  # ------------------------------------------------------------
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: dsh-app
+    restart: unless-stopped
+    depends_on:
+      hive-server:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+    environment:
+      # ---- 密钥：只从 .env 注入，容器内以环境变量存在，不写进镜像 ----
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      LLM_PROVIDER: ${LLM_PROVIDER:-deepseek}
+      # ---- 数据源 ----
+      HIVE_HOST: hive-server
+      HIVE_PORT: "10000"
+      HIVE_USER: hive
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: "8123"
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-ydsh}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:?CLICKHOUSE_PASSWORD 未设置}
+      CLICKHOUSE_DB: ydsh_ads
+      # ---- 运行参数 ----
+      API_TIMEOUT: "30"
+      QUERY_MAX_ROWS: "500"
+      WEEK3_PY: /app/week3/py
+      PYTHONPATH: /app:/app/week3/py
+    ports:
+      - "8000:8000"   # API + 大屏
+      - "8501:8501"   # Streamlit
+    volumes:
+      # 挂整个第 3 周目录（只读）：NL2SQL 链路要读 reports/data/schema.json，
+      # 只挂 py/ 会让 config.py 的 DATA_DIR 指到不存在的路径
+      - ../第3周:/app/week3:ro
+      - ./web:/app/web:ro
+    healthcheck:
+      # 用 /api/live 而不是 /api/health：后者会真连 Hive/ClickHouse，
+      # 15 秒一次等于持续往 Hive 发查询，日志噪音大且占连接
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8000/api/live >/dev/null || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 15
+      start_period: 60s
+
+volumes:
+  clickhouse-data:
+  superset-home:

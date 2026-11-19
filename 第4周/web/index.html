@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>云购生活 · 经营分析数据大屏</title>
+<link rel="stylesheet" href="/static/css/screen.css?v=20261118a">
+</head>
+<body>
+<!--
+  自适应方案：scale 整体缩放（手册步骤 3 给的思路）
+  设计稿固定 1920×1080，运行时按窗口比例整体 transform: scale()，
+  这样所有绝对定位的卡片、字号、间距都按同一比例缩放，不会错位。
+  相比 rem/vw 方案，scale 的优点是「所见即设计稿」，不用逐处换单位。
+-->
+<div id="stage">
+  <div id="screen">
+
+    <!-- ==================== 顶部标题栏 ==================== -->
+    <header class="topbar">
+      <div class="topbar__side">
+        <span class="dot dot--ok" id="engineDot"></span>
+        <span class="topbar__engine" id="engineText">数据引擎：连接中…</span>
+      </div>
+      <h1 class="topbar__title">
+        云购生活 · 企业级数据仓库经营分析大屏
+        <small>2024 全年 · 数据来源 Hive / ClickHouse</small>
+      </h1>
+      <div class="topbar__side topbar__side--right">
+        <span id="clock">--:--:--</span>
+      </div>
+    </header>
+
+    <!-- ==================== KPI 卡片 ==================== -->
+    <section class="kpi-row" id="kpiRow">
+      <div class="kpi-card">
+        <div class="kpi-card__label">总 GMV</div>
+        <div class="kpi-card__value" id="kpiGmv">--</div>
+        <div class="kpi-card__unit">元</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__label">订单量</div>
+        <div class="kpi-card__value" id="kpiOrder">--</div>
+        <div class="kpi-card__unit">单</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__label">客单价 AOV</div>
+        <div class="kpi-card__value" id="kpiAov">--</div>
+        <div class="kpi-card__unit">元</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__label">下单用户</div>
+        <div class="kpi-card__value" id="kpiBuyer">--</div>
+        <div class="kpi-card__unit">人</div>
+      </div>
+    </section>
+
+    <!-- ==================== 主体三栏 ==================== -->
+    <main class="grid">
+
+      <!-- 左列 -->
+      <div class="col col--left">
+        <div class="panel panel--tall">
+          <h2 class="panel__title">GMV 日趋势（含 7 日均线与异常日）</h2>
+          <div class="panel__chart" id="chartTrend"></div>
+        </div>
+        <div class="panel">
+          <h2 class="panel__title">品类销售排行</h2>
+          <div class="panel__chart" id="chartCategory"></div>
+        </div>
+      </div>
+
+      <!-- 中列 -->
+      <div class="col col--center">
+        <div class="panel panel--map">
+          <h2 class="panel__title">全国销售区域分布</h2>
+          <div class="panel__chart" id="chartMap"></div>
+        </div>
+        <div class="panel">
+          <h2 class="panel__title">时段 × 品类 销售热力图</h2>
+          <div class="panel__chart" id="chartHeat"></div>
+        </div>
+      </div>
+
+      <!-- 右列 -->
+      <div class="col col--right">
+        <div class="panel">
+          <h2 class="panel__title">支付方式占比</h2>
+          <div class="panel__chart" id="chartPay"></div>
+        </div>
+        <div class="panel">
+          <h2 class="panel__title">客单价 × 订单量 相关性</h2>
+          <div class="panel__chart" id="chartScatter"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ==================== 底部三栏 ==================== -->
+    <section class="bottom">
+      <div class="panel panel--table">
+        <h2 class="panel__title">门店销售 Top 10</h2>
+        <div class="panel__table" id="tableStore"></div>
+      </div>
+      <div class="panel panel--table">
+        <h2 class="panel__title">品类月度结构演化</h2>
+        <div class="panel__chart" id="chartStack"></div>
+      </div>
+      <div class="panel panel--table">
+        <h2 class="panel__title">渠道月度结构</h2>
+        <div class="panel__chart" id="chartChannel"></div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!--
+  资源版本号（?v=）的作用：
+  浏览器会按 URL 缓存 JS/CSS，改完代码后如果 URL 不变，用户拿到的还是旧文件，
+  表现为「代码明明改了、页面还是老样子」。在 URL 后挂版本号即可强制重新拉取。
+  每次改动 web/ 下的 js/css 后，把这里的 v 值改一下（或换成构建时间）。
+-->
+<script src="/static/vendor/echarts.min.js?v=20261118a"></script>
+<script src="/static/js/api.js?v=20261118a"></script>
+<script src="/static/js/charts.js?v=20261118a"></script>
+<script src="/static/js/screen.js?v=20261118a"></script>
+</body>
+</html>

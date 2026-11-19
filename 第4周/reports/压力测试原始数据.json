@@ -1,0 +1,246 @@
+{
+  "generated_at": "2026-11-17 09:27:03",
+  "concurrency": [
+    {
+      "concurrency": 1,
+      "total": 60,
+      "ok": 60,
+      "error_rate_pct": 0.0,
+      "avg_ms": 27.6,
+      "p50_ms": 30.9,
+      "p95_ms": 34.6,
+      "p99_ms": 36.5,
+      "max_ms": 37.4,
+      "path": "/api/kpi",
+      "label": "KPI 卡片（单行）"
+    },
+    {
+      "concurrency": 5,
+      "total": 60,
+      "ok": 60,
+      "error_rate_pct": 0.0,
+      "avg_ms": 34.1,
+      "p50_ms": 30.5,
+      "p95_ms": 57.0,
+      "p99_ms": 77.4,
+      "max_ms": 79.6,
+      "path": "/api/kpi",
+      "label": "KPI 卡片（单行）"
+    },
+    {
+      "concurrency": 20,
+      "total": 60,
+      "ok": 60,
+      "error_rate_pct": 0.0,
+      "avg_ms": 125.6,
+      "p50_ms": 125.6,
+      "p95_ms": 173.9,
+      "p99_ms": 181.7,
+      "max_ms": 182.3,
+      "path": "/api/kpi",
+      "label": "KPI 卡片（单行）"
+    },
+    {
+      "concurrency": 1,
+      "total": 60,
+      "ok": 60,
+      "error_rate_pct": 0.0,
+      "avg_ms": 43.2,
+      "p50_ms": 46.4,
+      "p95_ms": 50.8,
+      "p99_ms": 52.0,
+      "max_ms": 52.6,
+      "path": "/api/trend",
+      "label": "GMV 趋势（366 行）"
+    },
+    {
+      "concurrency": 5,
+      "total": 60,
+      "ok": 60,
+      "error_rate_pct": 0.0,
+      "avg_ms": 77.8,
+      "p50_ms": 73.8,
+      "p95_ms": 109.9,
+      "p99_ms": 115.1,
+      "max_ms": 117.0,
+      "path": "/api/trend",
+      "label": "GMV 趋势（366 行）"
+    },
+    {
+      "concurrency": 20,
+      "total": 60,
+      "ok": 60,
+      "error_rate_pct": 0.0,
+      "avg_ms": 282.7,
+      "p50_ms": 278.9,
+      "p95_ms": 403.0,
+      "p99_ms": 426.0,
+      "max_ms": 437.7,
+      "path": "/api/trend",
+      "label": "GMV 趋势（366 行）"
+    },
+    {
+      "concurrency": 1,
+      "total": 60,
+      "ok": 60,
+      "error_rate_pct": 0.0,
+      "avg_ms": 25.0,
+      "p50_ms": 30.8,
+      "p95_ms": 34.3,
+      "p99_ms": 38.4,
+      "max_ms": 40.6,
+      "path": "/api/heatmap",
+      "label": "时段热力（192 行）"
+    },
+    {
+      "concurrency": 5,
+      "total": 60,
+      "ok": 60,
+      "error_rate_pct": 0.0,
+      "avg_ms": 39.7,
+      "p50_ms": 37.0,
+      "p95_ms": 61.1,
+      "p99_ms": 67.5,
+      "max_ms": 70.5,
+      "path": "/api/heatmap",
+      "label": "时段热力（192 行）"
+    },
+    {
+      "concurrency": 20,
+      "total": 60,
+      "ok": 60,
+      "error_rate_pct": 0.0,
+      "avg_ms": 143.1,
+      "p50_ms": 151.0,
+      "p95_ms": 196.9,
+      "p99_ms": 200.7,
+      "max_ms": 201.2,
+      "path": "/api/heatmap",
+      "label": "时段热力（192 行）"
+    },
+    {
+      "concurrency": 1,
+      "total": 60,
+      "ok": 60,
+      "error_rate_pct": 0.0,
+      "avg_ms": 19.5,
+      "p50_ms": 14.2,
+      "p95_ms": 33.8,
+      "p99_ms": 37.4,
+      "max_ms": 40.5,
+      "path": "/api/category",
+      "label": "品类排行（8 行）"
+    },
+    {
+      "concurrency": 5,
+      "total": 60,
+      "ok": 60,
+      "error_rate_pct": 0.0,
+      "avg_ms": 35.2,
+      "p50_ms": 31.5,
+      "p95_ms": 59.1,
+      "p99_ms": 68.3,
+      "max_ms": 76.2,
+      "path": "/api/category",
+      "label": "品类排行（8 行）"
+    },
+    {
+      "concurrency": 20,
+      "total": 60,
+      "ok": 60,
+      "error_rate_pct": 0.0,
+      "avg_ms": 128.8,
+      "p50_ms": 128.0,
+      "p95_ms": 172.2,
+      "p99_ms": 176.7,
+      "max_ms": 176.8,
+      "path": "/api/category",
+      "label": "品类排行（8 行）"
+    },
+    {
+      "concurrency": 1,
+      "total": 60,
+      "ok": 60,
+      "error_rate_pct": 0.0,
+      "avg_ms": 21.0,
+      "p50_ms": 14.6,
+      "p95_ms": 36.0,
+      "p99_ms": 37.4,
+      "max_ms": 38.7,
+      "path": "/api/region",
+      "label": "区域分布（15 行）"
+    },
+    {
+      "concurrency": 5,
+      "total": 60,
+      "ok": 60,
+      "error_rate_pct": 0.0,
+      "avg_ms": 35.5,
+      "p50_ms": 32.9,
+      "p95_ms": 60.7,
+      "p99_ms": 65.1,
+      "max_ms": 65.1,
+      "path": "/api/region",
+      "label": "区域分布（15 行）"
+    },
+    {
+      "concurrency": 20,
+      "total": 60,
+      "ok": 60,
+      "error_rate_pct": 0.0,
+      "avg_ms": 120.7,
+      "p50_ms": 128.4,
+      "p95_ms": 155.6,
+      "p99_ms": 164.2,
+      "max_ms": 166.7,
+      "path": "/api/region",
+      "label": "区域分布（15 行）"
+    }
+  ],
+  "engine_compare": [
+    {
+      "label": "日 GMV 汇总（366 行）",
+      "hive_s": 2.61,
+      "hive_ok": true,
+      "clickhouse_s": 0.136,
+      "clickhouse_ok": true,
+      "speedup_x": 19.2
+    },
+    {
+      "label": "品类汇总（8 行）",
+      "hive_s": 2.55,
+      "hive_ok": true,
+      "clickhouse_s": 0.131,
+      "clickhouse_ok": true,
+      "speedup_x": 19.4
+    },
+    {
+      "label": "时段热力（192 行）",
+      "hive_s": 2.65,
+      "hive_ok": true,
+      "clickhouse_s": 0.168,
+      "clickhouse_ok": true,
+      "speedup_x": 15.8
+    }
+  ],
+  "partition_compare": [
+    {
+      "label": "DWD 明细全表聚合（无预聚合）",
+      "sql": "select round(sum(pay_amount),2) from ydsh_dwd.dwd_order where is_valid_amount=1",
+      "elapsed_s": 4.24,
+      "ok": true
+    },
+    {
+      "label": "DWD 明细按月聚合（带日期条件）",
+      "sql": "select substr(order_date,1,7) ym, round(sum(pay_amount),2) from ydsh_dwd.dwd_order where is_valid_amount=1 and order_date >= '2024-01-01' group by substr(order_date,1,7)",
+      "elapsed_s": 4.29,
+      "ok": true
+    },
+    {
+      "label": "ADS 预聚合月报（本周大屏实际用法）",
+      "sql": "select ym, gmv from ydsh_ads.ads_monthly_report",
+      "elapsed_s": 2.11,
+      "ok": true
+    }
+  ]
+}
